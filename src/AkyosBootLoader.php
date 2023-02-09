@@ -1,5 +1,7 @@
 <?php
 
+namespace Akyos\Core;
+
 use Akyos\Core\ACF\CustomFields;
 use Akyos\Core\Classes\Block;
 use Akyos\Core\Interface\AkyosBootableInterface;
@@ -8,10 +10,11 @@ use Akyos\Core\Wrappers\PostType;
 use Akyos\Core\Wrappers\Router;
 use Illuminate\Support\Collection;
 
-class AkyosBootLoader {
+class AkyosBootLoader
+{
 	
 	private Collection $classes;
-
+	
 	public function __construct()
 	{
 		$this->classes = collect([
@@ -26,7 +29,7 @@ class AkyosBootLoader {
 	public function load(): void
 	{
 		$this->classes->each(function ($class) {
-			if($class instanceof AkyosBootableInterface) {
+			if ($class instanceof AkyosBootableInterface) {
 				$this->loadClass($class);
 			}
 		});
@@ -36,7 +39,9 @@ class AkyosBootLoader {
 	{
 		add_action($class->hook() ?? 'after_setup_theme', function () use ($class) {
 			$class = new $class;
-			if(method_exists($class, 'boot')) { $class->boot(); }
+			if (method_exists($class, 'boot')) {
+				$class->boot();
+			}
 		});
 	}
 	
