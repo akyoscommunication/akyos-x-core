@@ -1,0 +1,54 @@
+// compile here => https://jsonformatter.org/scss-to-css
+
+@import '../libs/gpickr-master/dist/gpickr.min.css';
+
+.aky_acf_gradient-color-picker{
+  width: 100%;
+
+  .picker-btn {
+    display: flex;
+    border-radius: 2px;
+    overflow: hidden;
+    border: 1px solid #d9d9d9;
+    cursor: pointer;
+    justify-content: center;
+    width: fit-content;
+
+    span {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+      padding: 8px 16px;
+
+    }
+
+    .show-color {
+      width: 50px;
+      height: 50px;
+      border-radius: 2px;
+      overflow: hidden;
+      background: #fff;
+      margin: 10px;
+
+    }
+
+  }
+
+  .gpickr {
+    visibility: visible;
+    position: initial;
+    &.hidden {
+      visibility: hidden;
+      position: absolute;
+      .pcr-app {
+        visibility: hidden;
+      }
+    }
+  }
+
+  input.hidden {
+    visibility: hidden;
+
+  }
+
+}

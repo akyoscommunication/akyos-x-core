@@ -1,0 +1,42 @@
+@import '../libs/gpickr-master/dist/gpickr.min.css';
+.aky_acf_gradient-color-picker {
+  width: 100%;
+}
+.aky_acf_gradient-color-picker .picker-btn {
+  display: flex;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid #d9d9d9;
+  cursor: pointer;
+  justify-content: center;
+  width: fit-content;
+}
+.aky_acf_gradient-color-picker .picker-btn span {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  padding: 8px 16px;
+}
+.aky_acf_gradient-color-picker .picker-btn .show-color {
+  width: 50px;
+  height: 50px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #fff;
+  margin: 10px;
+}
+.aky_acf_gradient-color-picker .gpickr {
+  visibility: visible;
+  position: initial;
+}
+.aky_acf_gradient-color-picker .gpickr.hidden {
+  visibility: hidden;
+  position: absolute;
+}
+.aky_acf_gradient-color-picker .gpickr.hidden .pcr-app {
+  visibility: hidden;
+}
+.aky_acf_gradient-color-picker input.hidden {
+  visibility: hidden;
+}
+
