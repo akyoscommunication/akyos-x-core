@@ -2,7 +2,7 @@
 
 namespace Akyos\Core\Interface;
 
-interface AkyosBootableInterface
+interface IBootable
 {
 	public static function hook(): string;
 	

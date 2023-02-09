@@ -2,10 +2,10 @@
 
 namespace Akyos\Core\Wrappers;
 
-use Akyos\Core\Interface\AkyosBootableInterface;
+use Akyos\Core\Interface\IBootable;
 use Illuminate\Support\Facades\Blade;
 
-class Directives implements AkyosBootableInterface
+class Directives implements IBootable
 {
 	
 	public static function hook(): string { return 'after_setup_theme'; }

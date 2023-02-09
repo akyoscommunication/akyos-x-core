@@ -2,11 +2,11 @@
 
 namespace Akyos\Core\Classes;
 
-use Akyos\Core\Interface\AkyosBootableInterface;
+use Akyos\Core\Interface\IBootable;
 use Extended\ACF\Location;
 use Roots\Acorn\View\Component;
 
-abstract class Block extends Component implements AkyosBootableInterface
+abstract class Block extends Component implements IBootable
 {
 	
 	public function hook(): string { return 'init'; }

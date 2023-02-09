@@ -2,9 +2,9 @@
 
 namespace Akyos\Core\Wrappers;
 
-use Akyos\Core\Interface\AkyosBootableInterface;
+use Akyos\Core\Interface\IBootable;
 
-class Router implements AkyosBootableInterface
+class Router implements IBootable
 {
 	
 	public static function hook(): string { return "rest_api_init"; }

@@ -2,9 +2,9 @@
 
 namespace Akyos\Core\ACF;
 
-use Akyos\Core\Interface\AkyosBootableInterface;
+use Akyos\Core\Interface\IBootable;
 
-class CustomFields implements AkyosBootableInterface
+class CustomFields implements IBootable
 {
 	
 	const DirectoryIdentifier = "Field";

@@ -4,7 +4,7 @@ namespace Akyos\Core;
 
 use Akyos\Core\ACF\CustomFields;
 use Akyos\Core\Classes\Block;
-use Akyos\Core\Interface\AkyosBootableInterface;
+use Akyos\Core\Interface\IBootable;
 use Akyos\Core\Wrappers\Directives;
 use Akyos\Core\Wrappers\PostType;
 use Akyos\Core\Wrappers\Router;
@@ -31,7 +31,7 @@ class AkyosBootLoader
 	{
 		$this->classes->each(function ($class) {
 			$reflection = new \ReflectionClass($class);
-			if ($reflection->implementsInterface(AkyosBootableInterface::class)) {
+			if ($reflection->implementsInterface(IBootable::class)) {
 				$this->loadClass($class);
 			}
 		});
