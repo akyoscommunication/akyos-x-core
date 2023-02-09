@@ -4,7 +4,7 @@ namespace Akyos\Core\Interface;
 
 interface AkyosBootableInterface
 {
-	public function hook(): string;
+	public static function hook(): string;
 	
-	public function boot(): void;
+	public static function boot(): void;
 }

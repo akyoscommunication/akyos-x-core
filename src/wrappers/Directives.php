@@ -8,13 +8,20 @@ use Illuminate\Support\Facades\Blade;
 class Directives implements AkyosBootableInterface
 {
 	
-	public function hook(): string { return 'after_setup_theme'; }
-	public function boot(): void
+	public static function hook(): string { return 'after_setup_theme'; }
+	public static function boot(): void
 	{
-		$this->registerDirectives();
+		self::instance()->registerDirectives();
 	}
 	
-	public function __construct(){} // empty constructor
+	private static ?Directives $instance = null;
+	public static function instance(): Directives
+	{
+		if(self::$instance === null) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
 	
 	private function registerDirectives(): void
 	{

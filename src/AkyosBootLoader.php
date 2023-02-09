@@ -30,7 +30,8 @@ class AkyosBootLoader
 	public function load(): void
 	{
 		$this->classes->each(function ($class) {
-			if ($class instanceof AkyosBootableInterface) {
+			$reflection = new \ReflectionClass($class);
+			if ($reflection->implementsInterface(AkyosBootableInterface::class)) {
 				$this->loadClass($class);
 			}
 		});
@@ -38,10 +39,9 @@ class AkyosBootLoader
 	
 	private function loadClass(mixed $class): void
 	{
-		add_action($class->hook() ?? 'after_setup_theme', function () use ($class) {
-			$class = new $class;
+		add_action($class::hook() ?? 'after_setup_theme', function () use ($class) {
 			if (method_exists($class, 'boot')) {
-				$class->boot();
+				$class::boot();
 			}
 		});
 	}
@@ -57,9 +57,7 @@ class AkyosBootLoader
 		]);
 		
 		$reqs->each(function ($req) {
-			if (!$req->passed) {
-				wp_die($req->message);
-			}
+			if (!$req['passed']) { wp_die($req['passed']); }
 		});
 		
 	}

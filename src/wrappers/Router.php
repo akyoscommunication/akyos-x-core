@@ -7,14 +7,14 @@ use Akyos\Core\Interface\AkyosBootableInterface;
 class Router implements AkyosBootableInterface
 {
 	
-	public function hook(): string { return "rest_api_init"; }
-	public function boot(): void
+	public static function hook(): string { return "rest_api_init"; }
+	public static function boot(): void
 	{
-		$post_types_php = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'post_types.php';
+		$post_types_php = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'router.php';
 		try {
 			require_once $post_types_php;
 		} catch(\Exception $e) {
-			wp_die("Error: unable to find app/post_types.php");
+			wp_die("Error: unable to find app/router.php");
 		}
 	}
 	

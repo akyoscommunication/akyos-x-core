@@ -8,14 +8,14 @@ use Extended\ACF\Location;
 class PostType implements AkyosBootableInterface
 {
 	
-	public function hook(): string { return "init"; }
-	public function boot(): void
+	public static function hook(): string { return "init"; }
+	public static function boot(): void
 	{
-		$routes_php = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
+		$routes_php = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'post_types.php';
 		try {
 			require_once $routes_php;
 		} catch(\Exception $e) {
-			wp_die("Error: unable to find app/routes.php");
+			wp_die("Error: unable to find app/post_types.php");
 		}
 	}
 	
@@ -93,7 +93,7 @@ class PostType implements AkyosBootableInterface
 		}
 		return new self($slug, $title, $title_plural, $url_rewrite, $icon, $show_in_rest, $has_archive);
 	}
-
+	
 	public function taxonomies(array $taxonomies): PostType
 	{
 		$this->taxonomies = array_merge($this->taxonomies, $taxonomies);
