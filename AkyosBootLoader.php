@@ -12,7 +12,7 @@ class AkyosBootLoader {
 	
 	private Collection $classes;
 
-	public function __construct($classes)
+	public function __construct()
 	{
 		$this->classes = collect([
 			PostType::class,
