@@ -17,6 +17,7 @@ class AkyosBootLoader
 	
 	public function __construct()
 	{
+		$this->checkRequirements();
 		$this->classes = collect([
 			PostType::class,
 			Router::class,
@@ -43,6 +44,24 @@ class AkyosBootLoader
 				$class->boot();
 			}
 		});
+	}
+	
+	private function checkRequirements(): void
+	{
+		
+		$reqs = collect([
+			[
+				"passed" => function_exists('get_fields'),
+				"message" => "Akyos Core requires ACF Pro to be installed and activated."
+			]
+		]);
+		
+		$reqs->each(function ($req) {
+			if (!$req->passed) {
+				wp_die($req->message);
+			}
+		});
+		
 	}
 	
 }
