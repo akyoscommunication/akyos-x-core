@@ -45,14 +45,26 @@ abstract class Block extends Component implements IBootable
 	
 	public function renderCallback($block, $content = '', $is_preview = false)
 	{
-		if(get_fields()) {
+		if (get_fields()) {
 			foreach (get_fields() as $key => $value) {
 				$this->$key = $value;
 			}
 		}
 		
-		// Render the block.
-		echo $this->render()->with($this->extractPublicProperties());
+		if (method_exists($this, 'data')) { $this->data(); }
+		
+		$collect = collect((new \ReflectionObject($this))->getProperties(\ReflectionProperty::IS_PUBLIC))
+			->map(function (\ReflectionProperty $property) {
+				return $property->getName();
+			})->all();
+		
+		$values = [];
+		
+		foreach ($collect as $property) {
+			$values[$property] = $this->{$property};
+		}
+		
+		echo $this->render()->with($values);
 	}
 	
 	public function registerGutenberg()
