@@ -9,8 +9,8 @@ class CustomFields implements IBootable
 	
 	const DirectoryIdentifier = "Field";
 	
-	public function hook(): string { return 'after_setup_theme'; }
-	public function boot(): void
+	public static function hook(): string { return 'after_setup_theme'; }
+	public static function boot(): void
 	{
 		$fieldsDirectory = scandir(__DIR__ . DIRECTORY_SEPARATOR . 'CustomFields');
 		foreach ($fieldsDirectory as $items) {

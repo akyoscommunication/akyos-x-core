@@ -9,8 +9,8 @@ use Roots\Acorn\View\Component;
 abstract class Block extends Component implements IBootable
 {
 	
-	public function hook(): string { return 'init'; }
-	public function boot(): void
+	public static function hook(): string { return 'init'; }
+	public static function boot(): void
 	{
 		$path = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Blocks';
 		$directory = new \RecursiveDirectoryIterator($path);
