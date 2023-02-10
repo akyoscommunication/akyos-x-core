@@ -4,7 +4,8 @@
   "type": "akyos-bundle",
   "require": {
     "php": ">=8.1",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-curl": "*"
   },
   "license": "proprietary",
   "authors": [

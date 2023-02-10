@@ -14,10 +14,12 @@ class AkyosBootLoader
 {
 	
 	private Collection $classes;
+	private Collection $bootstrap;
 	
 	public function __construct()
 	{
 		$this->checkRequirements();
+		
 		$this->classes = collect([
 			PostType::class,
 			Router::class,
@@ -25,10 +27,23 @@ class AkyosBootLoader
 			Block::class,
 			CustomFields::class,
 		]);
+		
+		$this->bootstrap = collect([
+			'security', 'theme', 'colors'
+		]);
+		
 	}
 	
 	public function load(): void
 	{
+		// Load bootstrap files
+		$this->bootstrap->each(function ($file) {
+			$bootstrap = str_replace("/", DIRECTORY_SEPARATOR, __DIR__ . "/bootstrap/{$file}.php");
+			if(file_exists($bootstrap)) { require_once $bootstrap; }
+			else { wp_die("Error: unable to find {$bootstrap}.php"); }
+		});
+		
+		// Load classes
 		$this->classes->each(function ($class) {
 			$reflection = new \ReflectionClass($class);
 			if ($reflection->implementsInterface(IBootable::class)) {

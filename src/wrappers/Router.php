@@ -10,12 +10,14 @@ class Router implements IBootable
 	public static function hook(): string { return "rest_api_init"; }
 	public static function boot(): void
 	{
+		$router = new Router("akyos/v1");
 		$post_types_php = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'router.php';
 		try {
 			require_once $post_types_php;
 		} catch(\Exception $e) {
 			wp_die("Error: unable to find app/router.php");
 		}
+		$router->registerRoutes();
 	}
 	
 	private static Router $instance;
