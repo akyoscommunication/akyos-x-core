@@ -29,7 +29,7 @@ class AkyosBootLoader
 		]);
 		
 		$this->bootstrap = collect([
-			'security', 'theme', 'colors'
+			'security', 'theme', 'colors', 'helpers'
 		]);
 		
 	}

@@ -1,6 +1,6 @@
 <?php
 
-namespace Akyos\Core;
+namespace Akyos\Core\Helpers;
 
 use Akyos\Core\Classes\Vite;
 
