@@ -139,5 +139,5 @@ function echo_color_palette_style() {
 	$style .= '}</style>';
 	echo $style;
 }
-add_action('wp_head', 'App\\echo_color_palette_style');
-add_action('admin_head', 'App\\echo_color_palette_style');
+add_action('wp_head', function(){ echo_color_palette_style(); });
+add_action('admin_head', function(){ echo_color_palette_style(); });
