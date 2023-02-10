@@ -1,7 +1,8 @@
 <?php
 
 namespace Akyos\Core\Classes;
-use function Akyos\Core\checkReachability;
+
+use function Akyos\Core\Helpers\checkReachability;
 
 const ENV_DEV = 'development';
 class Vite {
@@ -75,7 +76,7 @@ class Vite {
 		}
 	}
 	
-	public function bundle($name): void
+	public function enqueue($name): void
 	{
 		$this->script($name);
 		!$this->isDev() ? $this->style($name) : null;
