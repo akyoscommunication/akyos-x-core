@@ -11,11 +11,11 @@ class Router implements IBootable
 	public static function boot(): void
 	{
 		$router = new Router("akyos/v1");
-		$post_types_php = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'router.php';
+		$post_types_php = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
 		try {
 			require_once $post_types_php;
 		} catch(\Exception $e) {
-			wp_die("Error: unable to find app/router.php");
+			wp_die("Error: unable to find app/routes.php");
 		}
 		$router->registerRoutes();
 	}
