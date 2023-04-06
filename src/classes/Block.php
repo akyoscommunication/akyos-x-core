@@ -45,25 +45,29 @@ abstract class Block extends Component implements IBootable
 	
 	public function renderCallback($block, $content = '', $is_preview = false)
 	{
-		if (get_fields()) {
-			foreach (get_fields() as $key => $value) {
-				$this->$key = $value;
-			}
+		$class = get_class($this);
+		$instance_block = new $class();
+		if ($fields = get_fields()) {
+		    foreach ($fields as $key => $value) {
+			$instance_block->$key = $value;
+		    }
 		}
-		
-		if (method_exists($this, 'data')) { $this->data(); }
-		
-		$collect = collect((new \ReflectionObject($this))->getProperties(\ReflectionProperty::IS_PUBLIC))
-			->map(function (\ReflectionProperty $property) {
-				return $property->getName();
-			})->all();
-		
+
+		if (method_exists($instance_block, 'data')) {
+		    $instance_block->data();
+		}
+
+		$collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
+		    ->map(function (\ReflectionProperty $property) {
+			return $property->getName();
+		    })->all();
+
 		$values = [];
-		
+
 		foreach ($collect as $property) {
-			$values[$property] = $this->{$property};
+		    $values[$property] = $instance_block->{$property};
 		}
-		
+
 		echo $this->render()->with($values);
 	}
 	
