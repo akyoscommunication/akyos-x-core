@@ -29,7 +29,10 @@ add_action('block_categories_all', function ($categories)
 
 add_action('widgets_init', function () {
 	
-	$columns = isset(get_field('footer_layout', 'option')['footer_columns']) ?? 4;
+	$columns = 4;
+	if ($footer_layout = get_field('footer_layout', 'option')) {
+		$columns = $footer_layout['footer_columns'];
+	}
 	
 	$config = [
 		'before_widget' => '<div class="widget mb-4">',
