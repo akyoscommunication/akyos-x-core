@@ -40,8 +40,9 @@ class Directives implements IBootable
 	private function iconDirective()
     {
         Blade::directive('icon', function ($name) {
-            $icons_path = __DIR__ . "/../../resources/assets/images/icons/'.".$name.".'.svg";
-            return "<?php include('$icons_path'); ?>";
+            $file = get_template_directory() . "/resources/assets/icons/{$expression}.svg";
+            if(!file_exists($file)) { return WP_ENV === 'development' ? "<!-- Icon {$expression} does not exists -->" : ''; }
+            return "<?php include '$file'; ?>";
         });
     }
 	
