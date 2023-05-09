@@ -3,12 +3,13 @@
 namespace Akyos\Core\Classes;
 
 use Akyos\Core\Interface\IBootable;
+use Extended\ACF\Fields\Group;
 use Extended\ACF\Location;
 use Roots\Acorn\View\Component;
 
 abstract class Block extends Component implements IBootable
 {
-	
+
 	public static function hook(): string { return 'init'; }
 	public static function boot(): void
 	{
@@ -24,7 +25,7 @@ abstract class Block extends Component implements IBootable
 			}
 		}
 	}
-	
+
 	protected GutenbergBlock $gutenberg;
 	public function registerBlock()
 	{
@@ -39,11 +40,16 @@ abstract class Block extends Component implements IBootable
 			]));
 		}
 	}
-	
+
 	abstract protected static function block(): GutenbergBlock;
 	abstract protected static function fields(): array;
-	
-	public function renderCallback($block, $content = '', $is_preview = false)
+
+    public static function make(string $label, string $id, $layout = 'table')
+    {
+        return Group::make($label, $id)->fields(static::fields())->layout($layout);
+    }
+
+    public function renderCallback($block, $content = '', $is_preview = false)
 	{
 		$class = get_class($this);
 		$instance_block = new $class();
@@ -70,12 +76,12 @@ abstract class Block extends Component implements IBootable
 
 		echo $this->render()->with($values);
 	}
-	
+
 	public function registerGutenberg()
 	{
 		$this->gutenberg = $this::block();
 		$this->registerBlock();
-		
+
 		if (function_exists('register_extended_field_group')) {
 			register_extended_field_group([
 				'title' => $this->gutenberg->getTitle().' Block',

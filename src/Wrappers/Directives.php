@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Blade;
 
 class Directives implements IBootable
 {
-	
+
 	public static function hook(): string { return 'after_setup_theme'; }
 	public static function boot(): void
 	{
 		self::instance()->registerDirectives();
 	}
-	
+
 	private static ?Directives $instance = null;
 	public static function instance(): Directives
 	{
@@ -22,31 +22,29 @@ class Directives implements IBootable
 		}
 		return self::$instance;
 	}
-	
+
 	private function registerDirectives(): void
 	{
 		$this->iconDirective();
 		$this->imageDirective();
 		$this->thumbnailDirective();
-		$this->menuDirective();
-        $this->shortcodeDirective();
 	}
-	
-	
+
+
 	/**
 	 * Blade directive for icons
 	 * @icon(string name)
 	 */
-	private function iconDirective()
-    {
-        Blade::directive('icon', function ($expression) {
-            $file = get_template_directory() . "/resources/assets/icons/{$expression}.svg";
-            if(!file_exists($file)) { return WP_ENV === 'development' ? "<!-- Icon {$expression} does not exists -->" : ''; }
-            return "<?php include '$file'; ?>";
-        });
-    }
-	
-	
+	private function iconDirective(): void
+	{
+		Blade::directive('icon', function ($expression) {
+			$file = get_template_directory() . "/resources/assets/icons/{$expression}.svg";
+			if(!file_exists($file)) { return WP_ENV === 'development' ? "<!-- Icon {$expression} does not exists -->" : ''; }
+			return "<?php include '$file'; ?>";
+		});
+	}
+
+
 	/**
 	 * Blade directive for images
 	 * @images(int id, string size = 'full')
@@ -57,8 +55,8 @@ class Directives implements IBootable
 			return "<?php echo wp_get_attachment_image({$expression}); ?>";
 		});
 	}
-	
-	
+
+
 	/**
 	 * Blade directive for post thumbnail
 	 * @thumbnail(int | WP_Post post, string size = 'full'
@@ -70,19 +68,5 @@ class Directives implements IBootable
 		});
 	}
 
-	private function menuDirective()
-    {
-        Blade::directive('menu', function($expression){
-            return "<?php echo wp_nav_menu(['theme_location' => $expression]) ?>";
-        });
-    }
 
-    private function shortcodeDirective()
-    {
-        Blade::directive('shortcode', function($e){
-            return "<?php echo do_shortcode($e) ?>";
-        });
-    }
-	
-	
 }

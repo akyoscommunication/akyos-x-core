@@ -12,14 +12,14 @@ use Illuminate\Support\Collection;
 
 class AkyosBootLoader
 {
-	
+
 	private Collection $classes;
 	private Collection $bootstrap;
-	
+
 	public function __construct()
 	{
 		$this->checkRequirements();
-		
+
 		$this->classes = collect([
 			PostType::class,
 			Router::class,
@@ -27,13 +27,12 @@ class AkyosBootLoader
 			Block::class,
 			CustomFields::class,
 		]);
-		
+
 		$this->bootstrap = collect([
 			'security', 'theme', 'colors', 'helpers'
 		]);
-		
 	}
-	
+
 	public function load(): void
 	{
 		// Load bootstrap files
@@ -42,7 +41,7 @@ class AkyosBootLoader
 			if(file_exists($bootstrap)) { require_once $bootstrap; }
 			else { wp_die("Error: unable to find {$bootstrap}.php"); }
 		});
-		
+
 		// Load classes
 		$this->classes->each(function ($class) {
 			$reflection = new \ReflectionClass($class);
@@ -51,7 +50,7 @@ class AkyosBootLoader
 			}
 		});
 	}
-	
+
 	private function loadClass(mixed $class): void
 	{
 		add_action($class::hook() ?? 'after_setup_theme', function () use ($class) {
@@ -60,21 +59,20 @@ class AkyosBootLoader
 			}
 		});
 	}
-	
+
 	private function checkRequirements(): void
 	{
-		
+
 		$reqs = collect([
 			[
 				"passed" => function_exists('get_fields'),
 				"message" => "Akyos Core requires ACF Pro to be installed and activated."
 			]
 		]);
-		
+
 		$reqs->each(function ($req) {
 			if (!$req['passed']) { wp_die($req['passed']); }
 		});
-		
+
 	}
-	
 }

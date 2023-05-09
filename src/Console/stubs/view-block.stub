@@ -1,0 +1,32 @@
+<?php
+
+namespace {{ namespace }};
+
+use Akyos\Core\Classes\Block;
+use Akyos\Core\Classes\GutenbergBlock;
+
+class {{ class }} extends Block
+{
+    public function __construct(
+    ) {
+    }
+
+    protected static function block(): GutenbergBlock
+    {
+        return (new GutenbergBlock())
+            ->setName("{{ slug }}")
+            ->setTitle("{{ class }}")
+        ;
+    }
+
+    protected static function fields(): array
+    {
+        return [
+        ];
+    }
+
+    public function render()
+    {
+        return {{ view }};
+    }
+}
