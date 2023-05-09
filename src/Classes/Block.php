@@ -49,7 +49,7 @@ abstract class Block extends Component implements IBootable
         	return Group::make($label, $id)->fields(static::fields())->layout($layout);
     	}
 
-    	public function renderCallback($block, $content = '', $is_preview = false)
+  	public function renderCallback($block, $content = '', $is_preview = false)
 	{
 		$class = get_class($this);
 		$instance_block = new $class();
@@ -59,11 +59,8 @@ abstract class Block extends Component implements IBootable
 		    }
 		}
 
-        	if (method_exists($instance_block, 'beforeRender')) {
-		    $instance_block->beforeRender();
-		}
-
         	$instance_block->data();
+
         	$collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
 		    ->map(function (\ReflectionProperty $property) {
 			return $property->getName();
