@@ -44,26 +44,27 @@ abstract class Block extends Component implements IBootable
 	abstract protected static function block(): GutenbergBlock;
 	abstract protected static function fields(): array;
 
-    public static function make(string $label, string $id, $layout = 'table')
-    {
-        return Group::make($label, $id)->fields(static::fields())->layout($layout);
-    }
+    	public static function make(string $label, string $id, $layout = 'table')
+    	{
+        	return Group::make($label, $id)->fields(static::fields())->layout($layout);
+    	}
 
-    public function renderCallback($block, $content = '', $is_preview = false)
+    	public function renderCallback($block, $content = '', $is_preview = false)
 	{
 		$class = get_class($this);
 		$instance_block = new $class();
 		if ($fields = get_fields()) {
 		    foreach ($fields as $key => $value) {
-			$instance_block->$key = $value;
+			    $instance_block->$key = $value;
 		    }
 		}
 
-		if (method_exists($instance_block, 'data')) {
-		    $instance_block->data();
+        	if (method_exists($instance_block, 'beforeRender')) {
+		    $instance_block->beforeRender();
 		}
 
-		$collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
+        	$instance_block->data();
+        	$collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
 		    ->map(function (\ReflectionProperty $property) {
 			return $property->getName();
 		    })->all();
