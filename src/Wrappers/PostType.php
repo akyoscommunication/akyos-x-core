@@ -59,7 +59,7 @@ class PostType implements IBootable
 				'with_front' => false,
 			],
 			'supports' => [
-				'title', 'thumbnail'
+				'title', 'thumbnail', 'excerpt'
 			]
 		]);
 	}
