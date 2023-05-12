@@ -6,25 +6,23 @@ use Extended\ACF\Location;
 
 class Taxonomy
 {
-	
-	private string $slug;
-	private string $title;
-	private string $title_plural;
-	private string $url_rewrite;
 	private array $fields = [];
-	
-	public function __construct(string $slug, string $title, string $title_plural, string $url_rewrite)
-	{
-		$this->slug = $slug;
-		$this->title = $title;
-		$this->title_plural = $title_plural;
-		$this->url_rewrite = $url_rewrite;
+
+	public function __construct(
+        private string $slug,
+        private string $title,
+        private string $title_plural,
+        private string $url_rewrite,
+        private mixed $posttypes,
+    ){
 		$this->createTaxonomy();
 	}
-	
-	private function createTaxonomy(): void
+
+	public function createTaxonomy(): self
 	{
-		register_taxonomy($this->slug, ['post'], [
+        if (!$this->posttypes) return $this;
+
+		register_taxonomy($this->slug, $this->posttypes, [
 			'label' => $this->title_plural,
 			'public' => true,
 			'show_ui' => true,
@@ -39,8 +37,10 @@ class Taxonomy
 				'with_front' => false,
 			],
 		]);
-	}
-	
+
+        return $this;
+    }
+
 	public function make(): void
 	{
 		register_extended_field_group([
@@ -54,12 +54,19 @@ class Taxonomy
 			],
 		]);
 	}
-	
-	public static function register(string $slug, string $title, string $title_plural, string $url_rewrite): Taxonomy
+
+    public function setPostTypes($posttypes): self
+    {
+        $this->posttypes = $posttypes;
+
+        return $this;
+    }
+
+	public static function register(string $slug, string $title, string $title_plural, string $url_rewrite, ?array $posttypes = null): Taxonomy
 	{
-		return new Taxonomy($slug, $title, $title_plural, $url_rewrite);
+		return new Taxonomy($slug, $title, $title_plural, $url_rewrite, $posttypes);
 	}
-	
+
 	public function fields(array $fields): Taxonomy
 	{
 		$this->fields = array_merge($this->fields, $fields);

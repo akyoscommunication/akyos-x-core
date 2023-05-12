@@ -6,6 +6,7 @@ use Akyos\Core\Interface\IBootable;
 use Extended\ACF\Fields\Group;
 use Extended\ACF\Location;
 use Roots\Acorn\View\Component;
+use function App\get_block_styles;
 
 abstract class Block extends Component implements IBootable
 {
@@ -55,15 +56,13 @@ abstract class Block extends Component implements IBootable
 		$instance_block = new $class();
 		if ($fields = get_fields()) {
 		    foreach ($fields as $key => $value) {
-			$instance_block->$key = $value;
+			    $instance_block->$key = $value;
 		    }
 		}
 
-		if (method_exists($instance_block, 'data')) {
-		    $instance_block->data();
-		}
+        $instance_block->data();
 
-		$collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
+        $collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
 		    ->map(function (\ReflectionProperty $property) {
 			return $property->getName();
 		    })->all();
@@ -73,6 +72,8 @@ abstract class Block extends Component implements IBootable
 		foreach ($collect as $property) {
 		    $values[$property] = $instance_block->{$property};
 		}
+
+        $values['block'] = $block;
 
 		echo $this->render()->with($values);
 	}

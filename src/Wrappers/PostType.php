@@ -7,7 +7,7 @@ use Extended\ACF\Location;
 
 class PostType implements IBootable
 {
-	
+
 	public static function hook(): string { return "init"; }
 	public static function boot(): void
 	{
@@ -18,7 +18,7 @@ class PostType implements IBootable
 			wp_die("Error: unable to find app/post_types.php");
 		}
 	}
-	
+
 	private string $slug;
 	private string $title;
 	private string $title_plural;
@@ -28,7 +28,7 @@ class PostType implements IBootable
 	private array $taxonomies = [];
 	private array $fields = [];
 	private bool $has_archive;
-	
+
 	public function __construct(string $slug, string $title, string $title_plural, string $url_rewrite, string $icon, bool $show_in_rest, bool $has_archive = false)
 	{
 		$this->slug = $slug;
@@ -40,7 +40,7 @@ class PostType implements IBootable
 		$this->has_archive = $has_archive;
 		$this->createPostType();
 	}
-	
+
 	private function createPostType(): void
 	{
 		register_post_type($this->slug, [
@@ -59,11 +59,13 @@ class PostType implements IBootable
 				'with_front' => false,
 			],
 			'supports' => [
-				'title', 'thumbnail'
+				'title',
+                'thumbnail',
+                'excerpt'
 			]
 		]);
 	}
-	
+
 	public function make(): void
 	{
 		$this->registerTaxonomies();
@@ -78,14 +80,15 @@ class PostType implements IBootable
 			],
 		]);
 	}
-	
+
 	private function registerTaxonomies(): void
 	{
-		foreach ($this->taxonomies as $taxonomy) {
-			$taxonomy->make();
+        /** @var Taxonomy $taxonomy */
+        foreach ($this->taxonomies as $taxonomy) {
+			$taxonomy->setPostTypes($this->slug)->createTaxonomy()->make();
 		}
 	}
-	
+
 	public static function register(string $slug, string $title, string $title_plural, string $url_rewrite, string $icon, bool $show_in_rest, bool $has_archive = false): PostType
 	{
 		if (post_type_exists($slug)) {
@@ -93,13 +96,13 @@ class PostType implements IBootable
 		}
 		return new self($slug, $title, $title_plural, $url_rewrite, $icon, $show_in_rest, $has_archive);
 	}
-	
+
 	public function taxonomies(array $taxonomies): PostType
 	{
 		$this->taxonomies = array_merge($this->taxonomies, $taxonomies);
 		return $this;
 	}
-	
+
 	public function fields(array $fields): PostType
 	{
 		$this->fields = array_merge($this->fields, $fields);

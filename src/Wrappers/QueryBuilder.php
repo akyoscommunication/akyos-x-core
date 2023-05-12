@@ -9,7 +9,7 @@ const DESC = 'DESC';
 
 class QueryBuilder
 {
-	
+
 	private string $post_type;
 	private int $limit;
 	private string $orderBy;
@@ -19,7 +19,7 @@ class QueryBuilder
 	private array $taxonomy = [];
 	private string $relation = 'AND';
 	private string $category;
-	
+
 	private function __construct($post_type)
 	{
 		$this->post_type = $post_type;
@@ -28,7 +28,7 @@ class QueryBuilder
 		$this->order = ASC;
 		$this->offset = 0;
 	}
-	
+
 	public static function make(string $post_type): QueryBuilder
 	{
 		if (!post_type_exists($post_type)) {
@@ -36,18 +36,18 @@ class QueryBuilder
 		}
 		return new QueryBuilder($post_type);
 	}
-	
+
 	public function all(): array
 	{
 		return QueryBuilder::make($this->post_type)->limit(-1)->get();
 	}
-	
+
 	public function limit(int $limit): QueryBuilder
 	{
 		$this->limit = $limit;
 		return $this;
 	}
-	
+
 	public function orderBy(string $value, string $order): QueryBuilder
 	{
 		if (!in_array($order, [ASC, DESC])) {
@@ -57,13 +57,13 @@ class QueryBuilder
 		$this->order = $order;
 		return $this;
 	}
-	
+
 	public function offset(int $offset): QueryBuilder
 	{
 		$this->offset = $offset;
 		return $this;
 	}
-	
+
 	public function where(string $key, $value, string $operator): QueryBuilder
 	{
 		$this->where[] = [
@@ -74,7 +74,7 @@ class QueryBuilder
 		];
 		return $this;
 	}
-	
+
 	public function orWhere(string $key, $value, string $operator): QueryBuilder
 	{
 		$this->where[] = [
@@ -86,7 +86,7 @@ class QueryBuilder
 		$this->relation = 'OR';
 		return $this;
 	}
-	
+
 	public function andWhere(string $key, $value, string $operator): QueryBuilder
 	{
 		$this->where[] = [
@@ -98,7 +98,7 @@ class QueryBuilder
 		$this->relation = 'AND';
 		return $this;
 	}
-	
+
 	public function category(string $category): QueryBuilder
 	{
 		if (!taxonomy_exists($category)) {
@@ -107,19 +107,29 @@ class QueryBuilder
 		$this->category = $category;
 		return $this;
 	}
-	
-	public function taxonomy(string $taxonomy, string $term): QueryBuilder
+
+    public function taxonomies(array $arr): QueryBuilder
+    {
+        foreach ($arr as $a) {
+            $this->taxonomy($a['taxonomy'], $a['term'], $a['field']);
+        }
+
+        return $this;
+    }
+
+	public function taxonomy(string $taxonomy, string $term, string $field = 'slug'): QueryBuilder
 	{
 		if (!taxonomy_exists($taxonomy)) {
 			wp_die('Unable to query ' . $taxonomy . ' because it does not exists.');
 		}
 		$this->taxonomy[] = [
 			'taxonomy' => $taxonomy,
+            'field' => $field,
 			'term' => $term,
 		];
 		return $this;
 	}
-	
+
 	public function get($returnFormat = 'array')
 	{
 		$args = [
@@ -142,11 +152,7 @@ class QueryBuilder
 		if (count($this->taxonomy) > 0) {
 			$args['tax_query'] = ['relation' => 'AND'];
 			foreach ($this->taxonomy as $taxonomy) {
-				$args['tax_query'][] = [
-					'taxonomy' => $taxonomy['taxonomy'],
-					'field' => 'slug',
-					'terms' => $taxonomy['term'],
-				];
+				$args['tax_query'][] = $taxonomy;
 			}
 		}
 		$query = (new WP_Query($args))->posts;
@@ -155,5 +161,5 @@ class QueryBuilder
 		}
 		return $query;
 	}
-	
+
 }
