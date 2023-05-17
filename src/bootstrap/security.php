@@ -59,3 +59,39 @@ add_filter('upload_mimes', function($mime_types){
 	return $mime_types;
 	
 });
+
+// Désactiver les commentaires pour les articles et les pages
+function disable_comments_post_types_support() {
+    $post_types = get_post_types();
+    foreach ($post_types as $post_type) {
+        if (post_type_supports($post_type, 'comments')) {
+            remove_post_type_support($post_type, 'comments');
+            remove_post_type_support($post_type, 'trackbacks');
+        }
+    }
+}
+add_action('admin_init', 'disable_comments_post_types_support');
+
+// Masquer les options de commentaire dans l'administration
+function disable_comments_admin_menu() {
+    remove_menu_page('edit-comments.php');
+}
+add_action('admin_menu', 'disable_comments_admin_menu');
+
+// Rediriger tout accès aux pages de commentaires existantes vers la page d'accueil
+function disable_comments_admin_menu_redirect() {
+    global $pagenow;
+    if ($pagenow === 'edit-comments.php') {
+        wp_redirect(admin_url());
+        exit;
+    }
+}
+add_action('admin_init', 'disable_comments_admin_menu_redirect');
+
+// Masquer l'interface de commentaire dans la barre d'outils de l'administration
+function disable_comments_admin_bar() {
+    if (is_admin_bar_showing()) {
+        remove_action('admin_bar_menu', 'wp_admin_bar_comments_menu', 60);
+    }
+}
+add_action('init', 'disable_comments_admin_bar');
