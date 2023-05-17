@@ -19,55 +19,48 @@ class PostType implements IBootable
 		}
 	}
 
-	private string $slug;
-	private string $title;
-	private string $title_plural;
-	private string $url_rewrite;
-	private string $icon;
-	private bool $show_in_rest;
 	private array $taxonomies = [];
 	private array $fields = [];
-	private bool $has_archive;
+    private array $config = [];
 
-	public function __construct(string $slug, string $title, string $title_plural, string $url_rewrite, string $icon, bool $show_in_rest, bool $has_archive = false)
-	{
-		$this->slug = $slug;
-		$this->title = $title;
-		$this->title_plural = $title_plural;
-		$this->url_rewrite = $url_rewrite;
-		$this->icon = $icon;
-		$this->show_in_rest = $show_in_rest;
-		$this->has_archive = $has_archive;
-		$this->createPostType();
-	}
+    public function __construct(
+        private string $slug,
+        private string $title,
+        private string $title_plural,
+        private string $url_rewrite,
+        private string $icon,
+        private bool $show_in_rest,
+        private bool $has_archive = false
+    ){}
 
 	private function createPostType(): void
 	{
-		register_post_type($this->slug, [
-			'label' => $this->title_plural,
-			'menu_icon' => 'dashicons-' . $this->icon,
-			'public'          => true,
-			'show_ui'         => true,
-			'show_in_menu'    => true,
-			'capability_type' => 'post',
-			'hierarchical'    => true,
-			'query_var'       => true,
-			'show_in_rest' => $this->show_in_rest,
-			'has_archive' => ($this->has_archive) ? $this->url_rewrite : false,
-			'rewrite' => [
-				'slug' => $this->url_rewrite,
-				'with_front' => false,
-			],
-			'supports' => [
-				'title',
+		register_post_type($this->slug, array_merge([
+            'label' => $this->title_plural,
+            'menu_icon' => 'dashicons-' . $this->icon,
+            'public'          => true,
+            'show_ui'         => true,
+            'show_in_menu'    => true,
+            'capability_type' => 'post',
+            'hierarchical'    => true,
+            'query_var'       => true,
+            'show_in_rest' => $this->show_in_rest,
+            'has_archive' => ($this->has_archive) ? $this->url_rewrite : false,
+            'rewrite' => [
+                'slug' => $this->url_rewrite,
+                'with_front' => false,
+            ],
+            'supports' => [
+                'title',
                 'thumbnail',
-                'excerpt'
-			]
-		]);
+                'excerpt',
+            ]
+        ], $this->config));
 	}
 
 	public function make(): void
 	{
+        $this->createPostType();
 		$this->registerTaxonomies();
 		register_extended_field_group([
 			'title' => $this->title,
@@ -80,6 +73,13 @@ class PostType implements IBootable
 			],
 		]);
 	}
+
+    public function setConfig(array $arr): self
+    {
+        $this->config = $arr;
+
+        return $this;
+    }
 
 	private function registerTaxonomies(): void
 	{

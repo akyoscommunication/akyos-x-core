@@ -108,23 +108,13 @@ class QueryBuilder
 		return $this;
 	}
 
-    public function taxonomies(array $arr): QueryBuilder
-    {
-        foreach ($arr as $a) {
-            $this->taxonomy($a['taxonomy'], $a['term'], $a['field']);
-        }
-
-        return $this;
-    }
-
-	public function taxonomy(string $taxonomy, string $term, string $field = 'slug'): QueryBuilder
+	public function taxonomy(string $taxonomy, string $term): QueryBuilder
 	{
 		if (!taxonomy_exists($taxonomy)) {
 			wp_die('Unable to query ' . $taxonomy . ' because it does not exists.');
 		}
 		$this->taxonomy[] = [
 			'taxonomy' => $taxonomy,
-            'field' => $field,
 			'term' => $term,
 		];
 		return $this;
@@ -152,7 +142,10 @@ class QueryBuilder
 		if (count($this->taxonomy) > 0) {
 			$args['tax_query'] = ['relation' => 'AND'];
 			foreach ($this->taxonomy as $taxonomy) {
-				$args['tax_query'][] = $taxonomy;
+				$args['tax_query'][] = [
+					'taxonomy' => $taxonomy['taxonomy'],
+					'terms' => $taxonomy['term'],
+				];
 			}
 		}
 		$query = (new WP_Query($args))->posts;

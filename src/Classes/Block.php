@@ -50,7 +50,7 @@ abstract class Block extends Component implements IBootable
         return Group::make($label, $id)->fields(static::fields())->layout($layout);
     }
 
-  	public function renderCallback($block, $content = '', $is_preview = false)
+    public function renderCallback($block, $content = '', $is_preview = false)
 	{
 		$class = get_class($this);
 		$instance_block = new $class();
