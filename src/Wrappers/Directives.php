@@ -28,6 +28,8 @@ class Directives implements IBootable
 		$this->iconDirective();
 		$this->imageDirective();
 		$this->thumbnailDirective();
+		$this->menuDirective();
+		$this->shortcodeDirective();
 	}
 
 
@@ -36,13 +38,12 @@ class Directives implements IBootable
 	 * @icon(string name)
 	 */
 	private function iconDirective(): void
-	{
-		Blade::directive('icon', function ($expression) {
-			$file = get_template_directory() . "/resources/assets/icons/{$expression}.svg";
-			if(!file_exists($file)) { return WP_ENV === 'development' ? "<!-- Icon {$expression} does not exists -->" : ''; }
-			return "<?php include '$file'; ?>";
-		});
-	}
+    {
+        Blade::directive('icon', function ($expression) {
+            $icons_path = get_template_directory() . "/resources/assets/icons/'." . $expression . ".'.svg";
+            return "<?php include('$icons_path'); ?>";
+        });
+    }
 
 
 	/**
@@ -67,6 +68,22 @@ class Directives implements IBootable
 			return "<?php echo get_the_post_thumbnail({$expression}); ?>";
 		});
 	}
+
+	// @menu
+    private function menuDirective()
+    {
+        Blade::directive('menu', function ($expression) {
+            return "<?php echo wp_nav_menu(['theme_location' => $expression]) ?>";
+        });
+    }
+
+    private function shortcodeDirective()
+    {
+        Blade::directive('shortcode', function ($e) {
+            return "<?php echo do_shortcode($e) ?>";
+        });
+    }
+
 
 
 }
