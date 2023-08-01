@@ -82,7 +82,7 @@ class BlockMakeCommand extends GeneratorCommand
         file_put_contents(
             $path,
             '<div>
-    <!-- '.Inspiring::quotes()->random().' -->
+    <!-- '.Inspiring::quotes().' -->
 </div>'
         );
 
