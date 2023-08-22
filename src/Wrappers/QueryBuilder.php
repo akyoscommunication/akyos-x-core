@@ -108,14 +108,14 @@ class QueryBuilder
 		return $this;
 	}
 
-	public function taxonomy(string $taxonomy, string $term): QueryBuilder
+	public function taxonomy(string $taxonomy, mixed $terms): QueryBuilder
 	{
 		if (!taxonomy_exists($taxonomy)) {
 			wp_die('Unable to query ' . $taxonomy . ' because it does not exists.');
 		}
 		$this->taxonomy[] = [
 			'taxonomy' => $taxonomy,
-			'term' => $term,
+			'terms' => $terms,
 		];
 		return $this;
 	}
@@ -144,7 +144,7 @@ class QueryBuilder
 			foreach ($this->taxonomy as $taxonomy) {
 				$args['tax_query'][] = [
 					'taxonomy' => $taxonomy['taxonomy'],
-					'terms' => $taxonomy['term'],
+					'terms' => $taxonomy['terms'],
 				];
 			}
 		}
