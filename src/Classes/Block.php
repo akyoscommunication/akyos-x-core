@@ -31,7 +31,13 @@ abstract class Block extends Component implements IBootable
 	public function registerBlock()
 	{
 		if (function_exists('acf_register_block_type')) {
-			acf_register_block_type(array_merge($this->gutenberg->getOpts(), [
+
+			$opts = $this->gutenberg->getOpts();
+            			$opts['supports']['spacing'] = [
+        	        		'padding' => true,
+	            		];
+			
+			acf_register_block_type(array_merge($opts, [
 				'name'  => $this->gutenberg->getName(),
 				'title' => __($this->gutenberg->getTitle()),
 				'description' => __($this->gutenberg->getDescription()),
@@ -74,8 +80,21 @@ abstract class Block extends Component implements IBootable
 		}
 
         $values['block'] = $block;
+	$spacing = null;
+        $pt = null;
+        $pb = null;
 
-		echo $this->render()->with($values);
+        if (isset($block['style']) && $block['style']['spacing']) {
+            if (isset($block['style']['spacing']['padding']['top'])) {
+                $pt = $block['style']['spacing']['padding']['top'];
+            }
+            if (isset($block['style']['spacing']['padding']['bottom'])) {
+                $pb = $block['style']['spacing']['padding']['bottom'];
+            }
+            $spacing = "--pt: $pt; --pb: $pb";
+        }
+
+		echo $this->render()->with($values)->with('spacing', $spacing);
 	}
 
 	public function registerGutenberg()
