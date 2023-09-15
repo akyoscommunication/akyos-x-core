@@ -49,17 +49,6 @@ add_filter('style_loader_src', 'remove_cssjs_ver', 10, 2);
 add_filter('script_loader_src', 'remove_cssjs_ver', 10, 2);
 
 
-/* -------------------------------------------*
- * Allow .cco files *
- * -------------------------------------------*/
-
-add_filter('upload_mimes', function($mime_types){
-	
-	$mime_types['cco'] = 'application/x-cocoa';
-	return $mime_types;
-	
-});
-
 // Désactiver les commentaires pour les articles et les pages
 function disable_comments_post_types_support() {
     $post_types = get_post_types();
