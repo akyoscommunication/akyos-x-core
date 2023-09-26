@@ -100,7 +100,7 @@ function options($option = null): bool|string|array
     return $optionValue;
 }
 
-function breadcrumb() {
+function breadcrumb($delimiter) {
     // Get the current post or page object
     global $post;
 
@@ -113,10 +113,11 @@ function breadcrumb() {
     $breadcrumbs = array();
 
     // Add the Home link
-    $breadcrumbs[] = '<a href="' . esc_url(home_url('/')) . '">Home</a>';
+    $breadcrumbs[] = '<a href="' . esc_url(home_url('/')) . '">Accueil</a>';
 
     // Get the ancestors (parent pages) of the current page
     $ancestors = get_post_ancestors($post);
+    $ancestors = array_reverse($ancestors);
 
     // Loop through the ancestors and add them to the breadcrumb trail
     foreach ($ancestors as $ancestor_id) {
@@ -128,5 +129,5 @@ function breadcrumb() {
     $breadcrumbs[] = esc_html($post->post_title);
 
     // Output the breadcrumb trail
-    echo '<div class="breadcrumbs">' . implode(' &gt; ', $breadcrumbs) . '</div>';
+    return '<div class="breadcrumbs">' . implode( ' '.$delimiter.' ', $breadcrumbs) . '</div>';
 }

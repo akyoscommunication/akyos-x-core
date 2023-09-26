@@ -89,7 +89,7 @@ class Directives implements IBootable
     private function breadcrumbDirective()
     {
         Blade::directive('breadcrumb', function ($expression){
-            return "<?php echo \Akyos\Core\Helpers\breadcrumb(); ?>";
+            return "<?php echo \Akyos\Core\Helpers\breadcrumb($expression); ?>";
         });
     }
 
