@@ -157,11 +157,16 @@ class QueryBuilder
                 ];
             }
         }
-        $query = (new WP_Query($args))->posts;
-        if ($returnFormat === 'obj') {
-            $query = objectify($query);
+        $query = (new WP_Query($args));
+
+        if($returnFormat === 'query') {
+            return $query;
         }
-        return $query;
+        if ($returnFormat === 'obj') {
+            return objectify($query->posts);
+        } else {
+            return $query->posts;
+        }
     }
 
 }

@@ -30,6 +30,7 @@ class Directives implements IBootable
 		$this->thumbnailDirective();
 		$this->menuDirective();
 		$this->shortcodeDirective();
+        $this->breadcrumbDirective();
 	}
 
 
@@ -85,5 +86,11 @@ class Directives implements IBootable
     }
 
 
+    private function breadcrumbDirective()
+    {
+        Blade::directive('breadcrumb', function ($expression){
+            return "<?php echo \Akyos\Core\Helpers\breadcrumb(); ?>";
+        });
+    }
 
 }

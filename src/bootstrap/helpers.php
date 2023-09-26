@@ -100,37 +100,33 @@ function options($option = null): bool|string|array
     return $optionValue;
 }
 
-function breadcrumb(): array
-{
-    $pages = [0 => ["title" => "Accueil", "url" => "/"]];
+function breadcrumb() {
+    // Get the current post or page object
+    global $post;
 
-    if (is_archive()) {
-        $post_type = get_post_type();
-        $map = [
-            "post" => ["title" => "Blog", "url" => "/blog"],
-            "property" => ["title" => "Nos biens", "url" => "/biens"],
-        ];
-        if (isset($map[$post_type])) {
-            $pages[] = $map[$post_type];
-        }
-    } elseif (is_single()) {
-        $post_type = get_post_type();
-        $map = [
-            "post" => ["title" => "Blog", "url" => "/blog"],
-            "property" => ["title" => "Nos biens", "url" => "/biens"],
-        ];
-        if (isset($map[$post_type])) {
-            $pages[] = $map[$post_type];
-        }
-        $pages[] = ["title" => get_the_title(), "url" => get_the_permalink()];
-        collect(get_post_ancestors(get_the_ID()))->each(function ($item) use (&$pages) {
-            $pages[] = ["title" => get_the_title($item), "url" => get_the_permalink($item)];
-        });
-    } else {
-        $pages[] = ["title" => get_the_title(), "url" => get_the_permalink()];
-        collect(get_post_ancestors(get_the_ID()))->each(function ($item) use (&$pages) {
-            $pages[] = ["title" => get_the_title($item), "url" => get_the_permalink($item)];
-        });
+    // Check if it's a valid object
+    if (!is_a($post, 'WP_Post')) {
+        return;
     }
-    return $pages;
+
+    // Initialize an empty breadcrumb array
+    $breadcrumbs = array();
+
+    // Add the Home link
+    $breadcrumbs[] = '<a href="' . esc_url(home_url('/')) . '">Home</a>';
+
+    // Get the ancestors (parent pages) of the current page
+    $ancestors = get_post_ancestors($post);
+
+    // Loop through the ancestors and add them to the breadcrumb trail
+    foreach ($ancestors as $ancestor_id) {
+        $ancestor = get_post($ancestor_id);
+        $breadcrumbs[] = '<a href="' . get_permalink($ancestor) . '">' . esc_html($ancestor->post_title) . '</a>';
+    }
+
+    // Add the current page to the breadcrumb trail
+    $breadcrumbs[] = esc_html($post->post_title);
+
+    // Output the breadcrumb trail
+    echo '<div class="breadcrumbs">' . implode(' &gt; ', $breadcrumbs) . '</div>';
 }
