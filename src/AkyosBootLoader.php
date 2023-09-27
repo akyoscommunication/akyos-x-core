@@ -71,7 +71,7 @@ class AkyosBootLoader
 		]);
 
 		$reqs->each(function ($req) {
-			if (!$req['passed']) { wp_die($req['passed']); }
+			if (!$req['passed']) { wp_die($req['message']); }
 		});
 
 	}
