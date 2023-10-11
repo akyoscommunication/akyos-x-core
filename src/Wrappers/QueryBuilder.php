@@ -2,6 +2,7 @@
 
 namespace Akyos\Core\Wrappers;
 
+use GuzzleHttp\Psr7\Query;
 use WP_Query;
 
 const ASC = 'ASC';
@@ -14,12 +15,13 @@ class QueryBuilder
     private int $limit;
     private string $orderBy;
     private string $order;
-    private int $offset;
+    private $offset;
     private string $research = "";
     private array $where = [];
     private array $taxonomy = [];
     private string $relation = 'AND';
-    private string $category;
+    private $category;
+    private string $paged;
 
     private function __construct($post_type)
     {
@@ -27,7 +29,9 @@ class QueryBuilder
         $this->limit = -1;
         $this->orderBy = 'date';
         $this->order = ASC;
-        $this->offset = 0;
+        $this->paged = 1;
+        $this->offset = null;
+        $this->category = null;
     }
 
     public static function make(string $post_type): QueryBuilder
@@ -46,6 +50,11 @@ class QueryBuilder
     public function limit(int $limit): QueryBuilder
     {
         $this->limit = $limit;
+        return $this;
+    }
+
+    public function page(int $page): QueryBuilder {
+        $this->paged = $page;
         return $this;
     }
 
@@ -107,9 +116,6 @@ class QueryBuilder
 
     public function category(string $category): QueryBuilder
     {
-        if (!taxonomy_exists($category)) {
-            wp_die('Unable to query ' . $category . ' because it does not exists.');
-        }
         $this->category = $category;
         return $this;
     }
@@ -133,10 +139,14 @@ class QueryBuilder
             'posts_per_page' => $this->limit,
             'orderby' => $this->orderBy,
             'order' => $this->order,
-            'offset' => $this->offset,
+            'offset' => $this->offset ?: ($this->paged-1) * $this->limit,
+            'paged' => $this->paged
         ];
         if (!empty($this->research)) {
             $args['s'] = $this->research;
+        }
+        if($this->category) {
+            $args['cat'] = $this->category;
         }
         if (count($this->where) > 0) {
             $args['meta_query'] = ['relation' => $this->relation];
