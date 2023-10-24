@@ -16,7 +16,7 @@ class QueryBuilder
     private string $orderBy;
     private string $order;
     private $offset;
-    private string $research = "";
+    private string $findWord = "";
     private array $where = [];
     private array $taxonomy = [];
     private string $relation = 'AND';
@@ -58,9 +58,9 @@ class QueryBuilder
         return $this;
     }
 
-    public function research(string $research)
+    public function findWord(string $word)
     {
-        $this->research = $research;
+        $this->findWord = $word;
     }
 
     public function orderBy(string $value, string $order): QueryBuilder
@@ -142,8 +142,8 @@ class QueryBuilder
             'offset' => $this->offset ?: ($this->paged-1) * $this->limit,
             'paged' => $this->paged
         ];
-        if (!empty($this->research)) {
-            $args['s'] = $this->research;
+        if (!empty($this->findWord)) {
+            $args['s'] = $this->findWord;
         }
         if($this->category) {
             $args['cat'] = $this->category;
