@@ -42,7 +42,7 @@ abstract class Block extends Component implements IBootable
 				'title' => __($this->gutenberg->getTitle()),
 				'description' => __($this->gutenberg->getDescription()),
 				'render_callback' => [$this, 'renderCallback'],
-//                'enqueue_style' => get_template_directory_uri() . '/views/blocks/'.$this->gutenberg['rootDir'].'/'.$this->name.'.css',
+                'icon' => $this->gutenberg->getIcon(),
 				'category' => $this->gutenberg->getCategory(),
 			]));
 		}
