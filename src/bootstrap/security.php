@@ -84,5 +84,3 @@ function disable_comments_admin_bar() {
     }
 }
 add_action('init', 'disable_comments_admin_bar');
-
-

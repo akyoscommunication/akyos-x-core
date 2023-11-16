@@ -61,6 +61,8 @@ class QueryBuilder
     public function findWord(string $word)
     {
         $this->findWord = $word;
+
+        return $this;
     }
 
     public function orderBy(string $value, string $order): QueryBuilder
