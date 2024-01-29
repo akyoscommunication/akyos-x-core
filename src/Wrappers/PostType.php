@@ -23,6 +23,12 @@ class PostType implements IBootable
 	private array $fields = [];
     private array $config = [];
 
+    private array $supports = [
+        'title',
+        'thumbnail',
+        'excerpt',
+    ];
+
     public function __construct(
         private string $slug,
         private string $title,
@@ -50,11 +56,7 @@ class PostType implements IBootable
                 'slug' => $this->url_rewrite,
                 'with_front' => false,
             ],
-            'supports' => [
-                'title',
-                'thumbnail',
-                'excerpt',
-            ]
+            'supports' => $this->supports
         ], $this->config));
 	}
 
@@ -73,6 +75,12 @@ class PostType implements IBootable
 			],
 		]);
 	}
+
+    public function supports(array $arr): self
+    {
+        $this->supports = $arr;
+        return $this;
+    }
 
     public function setConfig(array $arr): self
     {
