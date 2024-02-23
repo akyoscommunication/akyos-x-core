@@ -131,3 +131,8 @@ function breadcrumb($delimiter) {
     // Output the breadcrumb trail
     return '<div class="breadcrumbs">' . implode( ' '.$delimiter.' ', $breadcrumbs) . '</div>';
 }
+
+function objectify(array $array): object
+{
+    return json_decode(json_encode($array));
+}
