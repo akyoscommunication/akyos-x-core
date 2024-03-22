@@ -43,11 +43,12 @@ abstract class Block extends Component implements IBootable
 			foreach ($iterator as $name) {
 				/** @var Attribute $attributes */
 				$attributes = (new $name)->opt();
-				$opts['supports'] = array_merge($opts, $attributes->getAttributeOpt());
+				$opts = array_merge($opts, $attributes->getAttributeOpt());
 			}
 
-
-			acf_register_block_type(array_merge($opts, [
+			acf_register_block_type(array_merge([
+				'supports' => $opts
+			], [
 				'name' => $this->gutenberg->getName(),
 				'title' => __($this->gutenberg->getTitle()),
 				'description' => __($this->gutenberg->getDescription()),
@@ -96,10 +97,10 @@ abstract class Block extends Component implements IBootable
 
 		$iterator = (new AttributeUtils())->load();
 
-		if (isset($block['style'])) {
+		if (isset($block)) {
 			foreach ($iterator as $name) {
 				/** @var Attribute $attribute */
-				$attribute = (new $name)->setBlock($block['style'])->opt();
+				$attribute = (new $name)->setBlock($block)->opt();
 				$styles = array_merge($styles, $attribute->getOutputStyle());
 				$class = array_merge($class, $attribute->getOutputClass());
 			}
@@ -121,7 +122,7 @@ abstract class Block extends Component implements IBootable
 				!empty($styles) ? $styles : ""
 			)
 			->with(
-				'class',
+				'classes',
 				!empty($class) ? $class : ""
 			);
 	}
