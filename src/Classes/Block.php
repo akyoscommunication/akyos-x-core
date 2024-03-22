@@ -10,11 +10,14 @@ use function App\get_block_styles;
 
 abstract class Block extends Component implements IBootable
 {
+	public static function hook(): string
+	{
+		return 'init';
+	}
 
-	public static function hook(): string { return 'init'; }
 	public static function boot(): void
 	{
-		$path = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Blocks';
+		$path = get_template_directory().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'View'.DIRECTORY_SEPARATOR.'Blocks';
 		$directory = new \RecursiveDirectoryIterator($path);
 		$iterator = new \RecursiveIteratorIterator($directory);
 		foreach ($iterator as $info) {
@@ -28,73 +31,99 @@ abstract class Block extends Component implements IBootable
 	}
 
 	protected GutenbergBlock $gutenberg;
+
 	public function registerBlock()
 	{
 		if (function_exists('acf_register_block_type')) {
 
 			$opts = $this->gutenberg->getOpts();
-            			$opts['supports']['spacing'] = [
-        	        		'padding' => true,
-	            		];
-			
+			$attributes = [];
+
+			$iterator = (new AttributeUtils())->load();
+			foreach ($iterator as $name) {
+				/** @var Attribute $attributes */
+				$attributes = (new $name)->opt();
+				$opts['supports'] = array_merge($opts, $attributes->getAttributeOpt());
+			}
+
+
 			acf_register_block_type(array_merge($opts, [
-				'name'  => $this->gutenberg->getName(),
+				'name' => $this->gutenberg->getName(),
 				'title' => __($this->gutenberg->getTitle()),
 				'description' => __($this->gutenberg->getDescription()),
 				'render_callback' => [$this, 'renderCallback'],
-                'icon' => $this->gutenberg->getIcon(),
+				'icon' => $this->gutenberg->getIcon(),
 				'category' => $this->gutenberg->getCategory(),
 			]));
 		}
 	}
 
 	abstract protected static function block(): GutenbergBlock;
+
 	abstract protected static function fields(): array;
 
-    public static function make(string $label, string $id, $layout = 'table')
-    {
-        return Group::make($label, $id)->fields(static::fields())->layout($layout);
-    }
+	public static function make(string $label, string $id, $layout = 'table')
+	{
+		return Group::make($label, $id)->fields(static::fields())->layout($layout);
+	}
 
-    public function renderCallback($block, $content = '', $is_preview = false)
+	public function renderCallback($block, $content = '', $is_preview = false)
 	{
 		$class = get_class($this);
 		$instance_block = new $class();
 		if ($fields = get_fields()) {
-		    foreach ($fields as $key => $value) {
-			    $instance_block->$key = $value;
-		    }
+			foreach ($fields as $key => $value) {
+				$instance_block->$key = $value;
+			}
 		}
 
-        $instance_block->data();
+		$instance_block->data();
 
-        $collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
-		    ->map(function (\ReflectionProperty $property) {
-			return $property->getName();
-		    })->all();
+		$collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
+			->map(function (\ReflectionProperty $property) {
+				return $property->getName();
+			})->all();
 
 		$values = [];
 
 		foreach ($collect as $property) {
-		    $values[$property] = $instance_block->{$property};
+			$values[$property] = $instance_block->{$property};
 		}
 
-        $values['block'] = $block;
-	$spacing = null;
-        $pt = null;
-        $pb = null;
+		$values['block'] = $block;
+		$styles = [];
+		$class = [];
 
-        if (isset($block['style']) && $block['style']['spacing']) {
-            if (isset($block['style']['spacing']['padding']['top'])) {
-                $pt = $block['style']['spacing']['padding']['top'];
-            }
-            if (isset($block['style']['spacing']['padding']['bottom'])) {
-                $pb = $block['style']['spacing']['padding']['bottom'];
-            }
-            $spacing = "--pt: $pt; --pb: $pb";
-        }
+		$iterator = (new AttributeUtils())->load();
 
-		echo $this->render()->with($values)->with('spacing', $spacing);
+		if (isset($block['style'])) {
+			foreach ($iterator as $name) {
+				/** @var Attribute $attribute */
+				$attribute = (new $name)->setBlock($block['style'])->opt();
+				$styles = array_merge($styles, $attribute->getOutputStyle());
+				$class = array_merge($class, $attribute->getOutputClass());
+			}
+
+			$styles = implode(';', array_map(
+				function ($v, $k) {
+					return sprintf('%s: %s', $k, $v);
+				},
+				$styles,
+				array_keys($styles)
+			));
+
+			$class = implode(' ', $class);
+		}
+
+		echo $this->render()->with($values)
+			->with(
+				'styles',
+				!empty($styles) ? $styles : ""
+			)
+			->with(
+				'class',
+				!empty($class) ? $class : ""
+			);
 	}
 
 	public function registerGutenberg()
