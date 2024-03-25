@@ -12,12 +12,12 @@ class Spacing extends AttributeClass
 		$pt = null;
 		$pb = null;
 
-		if (isset($this->block['spacing'])) {
-			if (isset($this->block['spacing']['padding']['top'])) {
-				$pt = $this->block['spacing']['padding']['top'];
+		if (isset($this->block['style']['spacing'])) {
+			if (isset($this->block['style']['spacing']['padding']['top'])) {
+				$pt = $this->block['style']['spacing']['padding']['top'];
 			}
-			if (isset($this->block['spacing']['padding']['bottom'])) {
-				$pb = $this->block['spacing']['padding']['bottom'];
+			if (isset($this->block['style']['spacing']['padding']['bottom'])) {
+				$pb = $this->block['style']['spacing']['padding']['bottom'];
 			}
 		}
 
