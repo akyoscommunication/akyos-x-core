@@ -9,22 +9,18 @@ class Spacing extends AttributeClass
 {
 	protected function outputStyle(): array
 	{
-		$pt = null;
-		$pb = null;
+		$res = [];
 
 		if (isset($this->block['style']['spacing'])) {
 			if (isset($this->block['style']['spacing']['padding']['top'])) {
-				$pt = $this->block['style']['spacing']['padding']['top'];
+				$res['--pt'] = $this->block['style']['spacing']['padding']['top'];
 			}
 			if (isset($this->block['style']['spacing']['padding']['bottom'])) {
-				$pb = $this->block['style']['spacing']['padding']['bottom'];
+				$res['--pb'] = $this->block['style']['spacing']['padding']['bottom'];
 			}
 		}
 
-		return [
-			'--pt' => $pt,
-			'--pb' => $pb
-		];
+		return $res;
 	}
 
 	public function opt(): Attribute
