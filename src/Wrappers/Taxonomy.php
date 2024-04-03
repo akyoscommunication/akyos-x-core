@@ -29,6 +29,7 @@ class Taxonomy
 			'show_in_menu' => true,
 			'show_in_nav_menus' => true,
 			'show_in_quick_edit' => true,
+			'show_in_rest' => true,	  
 			'show_admin_column' => true,
 			'hierarchical' => true,
 			'query_var' => true,
