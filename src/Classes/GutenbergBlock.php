@@ -13,6 +13,7 @@ class GutenbergBlock
     public $opts = [];
 
     public $icon;
+    public $previewImage;
 
     /**
      * @return mixed
@@ -130,6 +131,24 @@ class GutenbergBlock
     public function setIcon($icon): self
     {
         $this->icon = $icon;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPreviewImage()
+    {
+        return $this->previewImage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function setPreviewImage($previewImage): self
+    {
+        $this->previewImage = $previewImage;
+
         return $this;
     }
 }
