@@ -10,136 +10,150 @@ use function App\get_block_styles;
 
 abstract class Block extends Component implements IBootable
 {
-	public static function hook(): string
-	{
-		return 'init';
-	}
+    public static function hook(): string
+    {
+        return 'init';
+    }
 
-	public static function boot(): void
-	{
-		$path = get_template_directory().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'View'.DIRECTORY_SEPARATOR.'Blocks';
-		$directory = new \RecursiveDirectoryIterator($path);
-		$iterator = new \RecursiveIteratorIterator($directory);
-		foreach ($iterator as $info) {
-			if (preg_match('/\w*[.]php\b/', $info->getFileName())) {
-				require_once $info->getPathName();
-				$name = explode('.', $info->getFileName());
-				$name = 'App\\View\\Blocks\\'.$name[0];
-				(new $name())->registerGutenberg();
-			}
-		}
-	}
+    public static function boot(): void
+    {
+        $path = get_template_directory().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'View'.DIRECTORY_SEPARATOR.'Blocks';
+        $directory = new \RecursiveDirectoryIterator($path);
+        $iterator = new \RecursiveIteratorIterator($directory);
+        foreach ($iterator as $info) {
+            if (preg_match('/\w*[.]php\b/', $info->getFileName())) {
+                require_once $info->getPathName();
+                $name = explode('.', $info->getFileName());
+                $name = 'App\\View\\Blocks\\'.$name[0];
+                (new $name())->registerGutenberg();
+            }
+        }
+    }
 
-	protected GutenbergBlock $gutenberg;
+    protected GutenbergBlock $gutenberg;
 
-	public function registerBlock()
-	{
-		if (function_exists('acf_register_block_type')) {
+    public function registerBlock()
+    {
+        if (function_exists('acf_register_block_type')) {
 
-			$opts = $this->gutenberg->getOpts();
-			$attributes = [];
+            $opts = $this->gutenberg->getOpts();
+            $attributes = [];
 
-			$iterator = (new AttributeUtils())->load();
-			foreach ($iterator as $name) {
-				/** @var Attribute $attributes */
-				$attributes = (new $name)->opt();
-				$opts = array_merge($opts, $attributes->getAttributeOpt());
-			}
+            $iterator = (new AttributeUtils())->load();
+            foreach ($iterator as $name) {
+                /** @var Attribute $attributes */
+                $attributes = (new $name)->opt();
+                $opts = array_merge($opts, $attributes->getAttributeOpt());
+            }
 
-			acf_register_block_type(array_merge([
-				'supports' => $opts
-			], [
-				'name' => $this->gutenberg->getName(),
-				'title' => __($this->gutenberg->getTitle()),
-				'description' => __($this->gutenberg->getDescription()),
-				'render_callback' => [$this, 'renderCallback'],
-				'icon' => $this->gutenberg->getIcon(),
-				'category' => $this->gutenberg->getCategory(),
-			]));
-		}
-	}
 
-	abstract protected static function block(): GutenbergBlock;
+            acf_register_block_type(array_merge([
+                'supports' => $opts,
+                'example' => [
+                    'attributes' => [
+                        'mode' => 'preview',
+                        'data' => [
+                            'preview_image_help' => $this->gutenberg->getPreviewImage()
+                        ]
+                    ]
+                ]
+            ], [
+                'name' => $this->gutenberg->getName(),
+                'title' => __($this->gutenberg->getTitle()),
+                'description' => __($this->gutenberg->getDescription()),
+                'render_callback' => [$this, 'renderCallback'],
+                'icon' => $this->gutenberg->getIcon(),
+                'category' => $this->gutenberg->getCategory()
+            ]));
+        }
+    }
 
-	abstract protected static function fields(): array;
+    abstract protected static function block(): GutenbergBlock;
 
-	public static function make(string $label, string $id, $layout = 'table')
-	{
-		return Group::make($label, $id)->fields(static::fields())->layout($layout);
-	}
+    abstract protected static function fields(): array;
 
-	public function renderCallback($block, $content = '', $is_preview = false)
-	{
-		$class = get_class($this);
-		$instance_block = new $class();
-		if ($fields = get_fields()) {
-			foreach ($fields as $key => $value) {
-				$instance_block->$key = $value;
-			}
-		}
+    public static function make(string $label, string $id, $layout = 'table')
+    {
+        return Group::make($label, $id)->fields(static::fields())->layout($layout);
+    }
 
-		$instance_block->data();
+    public function renderCallback($block, $content = '', $is_preview = false)
+    {
+        $class = get_class($this);
+        $instance_block = new $class();
+        if ($fields = get_fields()) {
+            foreach ($fields as $key => $value) {
+                $instance_block->$key = $value;
+            }
+        }
 
-		$collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
-			->map(function (\ReflectionProperty $property) {
-				return $property->getName();
-			})->all();
+        $instance_block->data();
 
-		$values = [];
+        $collect = collect((new \ReflectionObject($instance_block))->getProperties(\ReflectionProperty::IS_PUBLIC))
+            ->map(function (\ReflectionProperty $property) {
+                return $property->getName();
+            })->all();
 
-		foreach ($collect as $property) {
-			$values[$property] = $instance_block->{$property};
-		}
+        $values = [];
 
-		$values['block'] = $block;
-		$styles = [];
-		$class = [];
+        foreach ($collect as $property) {
+            $values[$property] = $instance_block->{$property};
+        }
 
-		$iterator = (new AttributeUtils())->load();
+        $values['block'] = $block;
+        $styles = [];
+        $class = [];
 
-		if (isset($block)) {
-			foreach ($iterator as $name) {
-				/** @var Attribute $attribute */
-				$attribute = (new $name)->setBlock($block)->opt();
-				$styles = array_merge($styles, $attribute->getOutputStyle());
-				$class = array_merge($class, $attribute->getOutputClass());
-			}
+        $iterator = (new AttributeUtils())->load();
 
-			$styles = implode(';', array_map(
-				function ($v, $k) {
-					return sprintf('%s: %s', $k, $v);
-				},
-				$styles,
-				array_keys($styles)
-			));
+        if (isset($block)) {
+            foreach ($iterator as $name) {
+                /** @var Attribute $attribute */
+                $attribute = (new $name)->setBlock($block)->opt();
+                $styles = array_merge($styles, $attribute->getOutputStyle());
+                $class = array_merge($class, $attribute->getOutputClass());
+            }
 
-			$class = implode(' ', $class);
-		}
+            $styles = implode(';', array_map(
+                function ($v, $k) {
+                    return sprintf('%s: %s', $k, $v);
+                },
+                $styles,
+                array_keys($styles)
+            ));
 
-		echo $this->render()->with($values)
-			->with(
-				'styles',
-				!empty($styles) ? $styles : ""
-			)
-			->with(
-				'classes',
-				!empty($class) ? $class : ""
-			);
-	}
+            $class = implode(' ', $class);
+        }
 
-	public function registerGutenberg()
-	{
-		$this->gutenberg = $this::block();
-		$this->registerBlock();
+        if (isset($block['data']['preview_image_help'])) {
+            echo '<img src="'.$block['data']['preview_image_help'].'" alt="preview" style="width: 100%; height: auto;">';
+        } else {
 
-		if (function_exists('register_extended_field_group')) {
-			register_extended_field_group([
-				'title' => $this->gutenberg->getTitle().' Block',
-				'fields' => static::fields(),
-				'location' => [
-					Location::where('block', 'acf/'.$this->gutenberg->getName())
-				],
-			]);
-		}
-	}
+            echo $this->render()->with($values)
+                ->with(
+                    'styles',
+                    !empty($styles) ? $styles : ""
+                )
+                ->with(
+                    'classes',
+                    !empty($class) ? $class : ""
+                );
+        }
+    }
+
+    public function registerGutenberg()
+    {
+        $this->gutenberg = $this::block();
+        $this->registerBlock();
+
+        if (function_exists('register_extended_field_group')) {
+            register_extended_field_group([
+                'title' => $this->gutenberg->getTitle().' Block',
+                'fields' => static::fields(),
+                'location' => [
+                    Location::where('block', 'acf/'.$this->gutenberg->getName())
+                ],
+            ]);
+        }
+    }
 }
