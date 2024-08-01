@@ -137,6 +137,7 @@ class QueryBuilder
     public function get($returnFormat = 'array')
     {
         $args = [
+            'post_status' => 'publish',
             'post_type' => $this->post_type,
             'posts_per_page' => $this->limit,
             'orderby' => $this->orderBy,
