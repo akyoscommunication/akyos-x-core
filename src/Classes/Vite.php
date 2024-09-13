@@ -70,9 +70,9 @@ class Vite {
 	public function style($name): void
 	{
 		if($this->isDev()) {
-			echo '<link rel="stylesheet" href="' . Vite::$devCSS . DIRECTORY_SEPARATOR . $name . '.css">';
+			echo '<link rel="stylesheet" href="' . Vite::$devCSS . DIRECTORY_SEPARATOR . $name . '.css" type="text/plain">';
 		} else {
-			echo '<link rel="stylesheet" href="' . $this->getBundle($name)->css . '">';
+			echo '<link rel="stylesheet" href="' . $this->getBundle($name)->css . '" type="text/plain">';
 		}
 	}
 
