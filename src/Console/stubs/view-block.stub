@@ -16,6 +16,9 @@ class {{ class }} extends Block
         return (new GutenbergBlock())
             ->setName("{{ slug }}")
             ->setTitle("{{ class }}")
+            ->setCategory("content")
+            ->setIcon("")
+            ->setPreviewImage(get_template_directory_uri() . '/resources/assets/images/previews/{{ slug }}.png')
         ;
     }
 
@@ -23,6 +26,10 @@ class {{ class }} extends Block
     {
         return [
         ];
+    }
+
+    public function data() {
+        return parent::data();
     }
 
     public function render()
