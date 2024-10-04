@@ -37,18 +37,16 @@ abstract class Block extends Component implements IBootable
         if (function_exists('acf_register_block_type')) {
 
             $opts = $this->gutenberg->getOpts();
-            $attributes = [];
+            $opts['supports'] = $opts['supports'] ?? [];
 
             $iterator = (new AttributeUtils())->load();
             foreach ($iterator as $name) {
-                /** @var Attribute $attributes */
-                $attributes = (new $name)->opt();
-                $opts = array_merge($opts, $attributes->getAttributeOpt());
+                /** @var Attribute $attrs */
+                $attrs = (new $name)->opt();
+                $opts['supports'] = array_merge($opts['supports'], $attrs->getAttributeOpt());
             }
 
-
-            acf_register_block_type(array_merge([
-                'supports' => $opts,
+            acf_register_block_type(array_merge($opts, [
                 'example' => [
                     'attributes' => [
                         'mode' => 'preview',
