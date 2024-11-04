@@ -29,24 +29,19 @@ abstract class Block extends Component implements IBootable
             }
         }
         
-        if (\Composer\InstalledVersions::isInstalled('akyoscommunication/akyos-blocks')) {
+         if (\Composer\InstalledVersions::isInstalled('akyoscommunication/akyos-blocks')) {
             $view = \Roots\view();
             $view->addNamespace('akyos-blocks', get_template_directory().DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'akyoscommunication'.DIRECTORY_SEPARATOR.'akyos-blocks'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR);
-            
-            $path = get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'akyoscommunication' . DIRECTORY_SEPARATOR . 'akyos-blocks' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Blocks';
-            $directory = new \RecursiveDirectoryIterator($path);
-            $iterator = new \RecursiveIteratorIterator($directory);
-            foreach ($iterator as $info) {
 
-                if (preg_match('/\w*[.]php\b/', $info->getFileName())) {
-                    require_once $info->getPathName();
-                    $name = explode('.', $info->getFileName());
-                    $name = 'Akyos\\Blocks\\View\\Blocks\\' . $name[0];
+            $akyos_blocks = get_template_directory().DIRECTORY_SEPARATOR.'akyos-blocks.json';
+            if (file_exists($akyos_blocks)) {
+                $blocks = json_decode(file_get_contents($akyos_blocks), true, 512, JSON_THROW_ON_ERROR);
+                foreach ($blocks as $block) {
+                    $name = 'Akyos\\Blocks\\View\\Blocks\\'.$block;
                     (new $name())->registerGutenberg();
                 }
             }
         }
-    
     }
 
     protected GutenbergBlock $gutenberg;
