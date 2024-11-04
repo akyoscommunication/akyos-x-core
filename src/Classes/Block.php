@@ -30,6 +30,9 @@ abstract class Block extends Component implements IBootable
         }
         
         if (\Composer\InstalledVersions::isInstalled('akyoscommunication/akyos-blocks')) {
+            $view = \Roots\view();
+            $view->addNamespace('akyos-blocks', get_template_directory().DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'akyoscommunication'.DIRECTORY_SEPARATOR.'akyos-blocks'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR);
+            
             $path = get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'akyoscommunication' . DIRECTORY_SEPARATOR . 'akyos-blocks' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Blocks';
             $directory = new \RecursiveDirectoryIterator($path);
             $iterator = new \RecursiveIteratorIterator($directory);
