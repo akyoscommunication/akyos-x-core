@@ -28,6 +28,22 @@ abstract class Block extends Component implements IBootable
                 (new $name())->registerGutenberg();
             }
         }
+        
+        if (\Composer\InstalledVersions::isInstalled('akyoscommunication/akyos-blocks')) {
+            $path = get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'akyoscommunication' . DIRECTORY_SEPARATOR . 'akyos-blocks' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Blocks';
+            $directory = new \RecursiveDirectoryIterator($path);
+            $iterator = new \RecursiveIteratorIterator($directory);
+            foreach ($iterator as $info) {
+
+                if (preg_match('/\w*[.]php\b/', $info->getFileName())) {
+                    require_once $info->getPathName();
+                    $name = explode('.', $info->getFileName());
+                    $name = 'Akyos\\Blocks\\View\\Blocks\\' . $name[0];
+                    (new $name())->registerGutenberg();
+                }
+            }
+        }
+    
     }
 
     protected GutenbergBlock $gutenberg;
