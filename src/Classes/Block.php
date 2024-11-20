@@ -3,6 +3,7 @@
 namespace Akyos\Core\Classes;
 
 use Akyos\Core\Interface\IBootable;
+use Composer\InstalledVersions;
 use Extended\ACF\Fields\Group;
 use Extended\ACF\Location;
 use Roots\Acorn\View\Component;
@@ -15,6 +16,9 @@ abstract class Block extends Component implements IBootable
         return 'init';
     }
 
+    /**
+     * @throws \JsonException
+     */
     public static function boot(): void
     {
         $path = get_template_directory().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'View'.DIRECTORY_SEPARATOR.'Blocks';
@@ -28,8 +32,9 @@ abstract class Block extends Component implements IBootable
                 (new $name())->registerGutenberg();
             }
         }
-        
-         if (\Composer\InstalledVersions::isInstalled('akyoscommunication/akyos-blocks')) {
+
+        //check if akyos-blocks is installed
+        if (InstalledVersions::isInstalled('akyoscommunication/akyos-blocks')) {
             $view = \Roots\view();
             $view->addNamespace('akyos-blocks', get_template_directory().DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'akyoscommunication'.DIRECTORY_SEPARATOR.'akyos-blocks'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR);
 
@@ -42,6 +47,20 @@ abstract class Block extends Component implements IBootable
                 }
             }
         }
+
+        //check if akyos-access id installed
+        if (InstalledVersions::isInstalled('akyos/akyos-access')) {
+            $view = \Roots\view();
+
+            $akyos_blocks = get_template_directory().DIRECTORY_SEPARATOR.'akyos-blocks.json';
+            if (file_exists($akyos_blocks)) {
+                $blocks = json_decode(file_get_contents($akyos_blocks), true, 512, JSON_THROW_ON_ERROR);
+                foreach ($blocks as $block) {
+                    $name = 'Akyos\\Access\\View\\Blocks\\'.$block;
+                    (new $name())->registerGutenberg();
+                }
+            }
+        }
     }
 
     protected GutenbergBlock $gutenberg;
@@ -49,7 +68,6 @@ abstract class Block extends Component implements IBootable
     public function registerBlock()
     {
         if (function_exists('acf_register_block_type')) {
-
             $opts = $this->gutenberg->getOpts();
             $opts['supports'] = $opts['supports'] ?? [];
 
