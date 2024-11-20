@@ -9,6 +9,7 @@ use Akyos\Core\Wrappers\Directives;
 use Akyos\Core\Wrappers\PostType;
 use Akyos\Core\Wrappers\Router;
 use Illuminate\Support\Collection;
+use WP_CLI;
 
 class AkyosBootLoader
 {
@@ -63,16 +64,11 @@ class AkyosBootLoader
 	private function checkRequirements(): void
 	{
 
-		$reqs = collect([
-			[
-				"passed" => function_exists('get_fields'),
-				"message" => "Akyos Core requires ACF Pro to be installed and activated."
-			]
-		]);
+        require_once ABSPATH . '/wp-admin/includes/plugin.php';
 
-		$reqs->each(function ($req) {
-			if (!$req['passed']) { wp_die($req['message']); }
-		});
+        if(!function_exists('get_fields')) {
+            activate_plugin('advanced-custom-fields-pro/acf.php');
+        }
 
 	}
 }
