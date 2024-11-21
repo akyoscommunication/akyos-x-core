@@ -63,7 +63,6 @@ abstract class Block extends Component implements IBootable
             acf_register_block_type(array_merge($opts, [
                 'example' => [
                     'attributes' => [
-                        'mode' => 'preview',
                         'data' => [
                             'preview_image_help' => $this->gutenberg->getPreviewImage()
                         ]
