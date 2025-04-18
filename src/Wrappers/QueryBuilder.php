@@ -22,6 +22,7 @@ class QueryBuilder
     private string $relation = 'AND';
     private $category;
     private string $paged;
+    private string $metaKey = '';
 
     private function __construct($post_type)
     {
@@ -65,10 +66,13 @@ class QueryBuilder
         return $this;
     }
 
-    public function orderBy(string $value, string $order): QueryBuilder
+    public function orderBy(string $value, string $order, ?string $acfField = null): QueryBuilder
     {
         if (!in_array($order, [ASC, DESC])) {
             wp_die('Unable to order by ' . $order . ' because it is not a valid order.');
+        }
+        if($acfField) {
+            $this->metaKey = $acfField;
         }
         $this->orderBy = $value;
         $this->order = $order;
@@ -145,6 +149,9 @@ class QueryBuilder
             'offset' => $this->offset ?: ($this->paged-1) * $this->limit,
             'paged' => $this->paged
         ];
+        if(!empty($this->metaKey)) {
+            $args['meta_key'] = $this->metaKey;
+        }
         if (!empty($this->findWord)) {
             $args['s'] = $this->findWord;
         }
