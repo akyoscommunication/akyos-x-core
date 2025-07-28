@@ -1,0 +1,23 @@
+{
+    "name": "akyos-x-core",
+    "version": "1.0.0",
+    "description": "Core package for Akyos WordPress theme",
+    "main": "index.js",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "watch": "vite build --watch"
+    },
+    "devDependencies": {
+        "vite": "^5.0.0",
+        "sass": "^1.69.0"
+    },
+    "keywords": [
+        "wordpress",
+        "theme",
+        "modules"
+    ],
+    "author": "Akyos",
+    "license": "MIT"
+}

@@ -4,6 +4,7 @@ namespace Akyos\Core;
 
 use Akyos\Core\ACF\CustomFields;
 use Akyos\Core\Classes\Block;
+use Akyos\Core\Classes\ModuleManager;
 use Akyos\Core\Interface\IBootable;
 use Akyos\Core\Wrappers\Directives;
 use Akyos\Core\Wrappers\PostType;
@@ -27,10 +28,14 @@ class AkyosBootLoader
 			Directives::class,
 			Block::class,
 			CustomFields::class,
+			ModuleManager::class,
 		]);
 
 		$this->bootstrap = collect([
-			'security', 'theme', 'colors', 'helpers'
+			'security',
+			'theme',
+			'colors',
+			'helpers'
 		]);
 	}
 
@@ -39,8 +44,11 @@ class AkyosBootLoader
 		// Load bootstrap files
 		$this->bootstrap->each(function ($file) {
 			$bootstrap = str_replace("/", DIRECTORY_SEPARATOR, __DIR__ . "/bootstrap/{$file}.php");
-			if(file_exists($bootstrap)) { require_once $bootstrap; }
-			else { wp_die("Error: unable to find {$bootstrap}.php"); }
+			if (file_exists($bootstrap)) {
+				require_once $bootstrap;
+			} else {
+				wp_die("Error: unable to find {$bootstrap}.php");
+			}
 		});
 
 		// Load classes
@@ -64,11 +72,10 @@ class AkyosBootLoader
 	private function checkRequirements(): void
 	{
 
-        require_once ABSPATH . '/wp-admin/includes/plugin.php';
+		require_once ABSPATH . '/wp-admin/includes/plugin.php';
 
-        if(!function_exists('get_fields')) {
-            activate_plugin('advanced-custom-fields-pro/acf.php');
-        }
-
+		if (!function_exists('get_fields')) {
+			activate_plugin('advanced-custom-fields-pro/acf.php');
+		}
 	}
 }

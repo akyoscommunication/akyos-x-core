@@ -1,0 +1,166 @@
+// Variables sont importées depuis _variables.scss
+
+// Mixins
+@mixin card-base {
+    background: #fff;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: $shadow-light;
+    transition: all 0.3s ease;
+}
+
+@mixin status-indicator($color, $shadow-color: null) {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    background: $color;
+
+    @if $shadow-color {
+        box-shadow: 0 0 0 2px rgba($shadow-color, 0.2);
+    }
+}
+
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+}
+
+@mixin flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+// Grid Layout
+.akyos-modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+// Module Cards
+.akyos-module-card {
+    @include card-base;
+
+    &:hover {
+        box-shadow: $shadow-medium;
+        transform: translateY(-2px);
+    }
+
+    &.active {
+        border-color: $primary-color;
+        background: $background-active;
+    }
+
+    &.inactive {
+        border-color: $border-color;
+        background: $background-light;
+    }
+}
+
+// Module Header
+.module-header {
+    @include flex-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid $border-light;
+
+    h3 {
+        margin: 0;
+        color: $text-color;
+        font-size: 18px;
+        font-weight: 600;
+    }
+}
+
+// Status Indicators
+.module-status {
+    @include flex-center;
+    gap: 8px;
+}
+
+.status-indicator {
+    &.active {
+        @include status-indicator($primary-color, $primary-color);
+    }
+
+    &.inactive {
+        @include status-indicator(#ccc);
+    }
+}
+
+.status-text {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &:has(+ .status-indicator.active) {
+        color: $primary-color;
+    }
+
+    &:has(+ .status-indicator.inactive) {
+        color: $text-muted;
+    }
+}
+
+// Module Content
+.module-content {
+    margin-bottom: 20px;
+}
+
+.module-description {
+    color: $text-muted;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+
+
+// Module Actions
+.module-actions {
+    text-align: right;
+}
+
+.toggle-module {
+    min-width: 100px;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: $shadow-hover;
+    }
+}
+
+// Animations
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.akyos-module-card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+// Responsive Design
+@media (max-width: $breakpoint-mobile) {
+    .akyos-modules-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .module-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
