@@ -6,7 +6,8 @@ export default defineConfig({
         outDir: 'dist',
         rollupOptions: {
             input: {
-                'modules-admin': resolve(__dirname, 'assets/js/modules-admin.js')
+                'modules-admin': resolve(__dirname, 'assets/js/modules-admin.js'),
+                'wireframe': resolve(__dirname, 'src/Modules/Wireframe/resources/assets/module-wireframe.js')
             },
             output: {
                 entryFileNames: 'js/[name].js',

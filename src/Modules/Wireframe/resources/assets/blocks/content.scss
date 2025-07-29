@@ -1,0 +1,8 @@
+section {
+    &[class*="s-content"] {
+        p {
+            height: 300px !important;
+            min-width: 75% !important;
+        }
+    }
+}

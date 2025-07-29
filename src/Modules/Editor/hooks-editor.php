@@ -2,6 +2,7 @@
 
 use Akyos\Core\Wrappers\QueryBuilder;
 
+
 /**
  * Redirection des utilisateurs non connectés vers /editor
  * Sauf pour les URLs WordPress essentielles
@@ -30,6 +31,16 @@ add_action('template_redirect', function () {
 
         // Vérifier si l'URL actuelle est autorisée
         $is_allowed = false;
+
+        // Autoriser les URLs de prévisualisation WordPress
+        if (isset($_REQUEST['preview']) && $_REQUEST['preview'] === 'true') {
+            $is_allowed = true;
+        }
+
+        // Autoriser aussi les prévisualisations avec preview_id et preview_nonce
+        if (isset($_REQUEST['preview_id']) || isset($_REQUEST['preview_nonce'])) {
+            $is_allowed = true;
+        }
 
         // Vérifier les URLs exactes
         foreach ($allowed_urls as $allowed_url) {
@@ -60,7 +71,6 @@ add_action('template_redirect', function () {
  * Ils ne peuvent accéder qu'aux URLs /editor et /editor/{id}
  */
 add_action('template_redirect', function () {
-    // Vérifier si l'utilisateur est connecté et a le rôle admin-lite
     if (is_user_logged_in() && current_user_can('editor')) {
         $current_url = $_SERVER['REQUEST_URI'];
         $home_url = home_url();
@@ -77,7 +87,8 @@ add_action('template_redirect', function () {
             '/wp-admin/admin-ajax.php',
             '/wp-includes/',
             '/wp-content/',
-            '/wp-admin/admin-post.php'
+            '/wp-admin/admin-post.php',
+            '/'
         ];
 
         // Vérifier si l'URL actuelle est autorisée
@@ -96,13 +107,81 @@ add_action('template_redirect', function () {
             $is_allowed = true;
         }
 
-        // Si l'URL n'est pas autorisée, rediriger vers /editor
+        // Autoriser les URLs de prévisualisation WordPress
+        $full_url = $_SERVER['REQUEST_URI'];
+        if (!empty($_SERVER['QUERY_STRING'])) {
+            $full_url .= '?' . $_SERVER['QUERY_STRING'];
+        }
+
+        if (
+            strpos($current_url, 'preview=true') !== false ||
+            strpos($full_url, 'preview=true') !== false ||
+            (isset($_REQUEST['preview']) && $_REQUEST['preview'] === 'true') ||
+            isset($_REQUEST['preview_id']) ||
+            isset($_REQUEST['preview_nonce'])
+        ) {
+            $is_allowed = true;
+        }
+
+        // Autoriser aussi les prévisualisations avec preview_id et preview_nonce
+        if (isset($_REQUEST['preview_id']) || isset($_REQUEST['preview_nonce'])) {
+            $is_allowed = true;
+        }
+
         if (!$is_allowed) {
             wp_redirect(home_url('/editor/'));
             exit;
         }
     }
 }, 1); // Priorité 1 pour s'exécuter en premier
+
+/**
+ * Générer le HTML de prévisualisation
+ */
+function generatePreviewHTML($title, $content)
+{
+    ob_start();
+?>
+    <!DOCTYPE html>
+    <html lang="fr">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Prévisualisation : <?php echo esc_html($title); ?></title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background: #f9fafb;
+                line-height: 1.7;
+                color: #374151;
+            }
+
+            .preview-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                background: white;
+                padding: 40px;
+                border-radius: 12px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="preview-container">
+            <div class="preview-content">
+                <?php echo apply_filters('the_content', $content); ?>
+            </div>
+        </div>
+    </body>
+
+    </html>
+<?php
+    return ob_get_clean();
+}
 
 /**
  * Redirection des utilisateurs subscriber vers une page personnalisée
@@ -163,6 +242,10 @@ add_action('init', function () {
         'index.php?custom_editor_logout=1',
         'top'
     );
+
+    if (current_user_can('editor')) {
+        show_admin_bar(false);
+    }
 }, 300);
 
 /**
@@ -171,7 +254,9 @@ add_action('init', function () {
 add_filter('query_vars', function ($vars) {
     $vars[] = 'custom_editor';
     $vars[] = 'custom_editor_logout';
+    $vars[] = 'custom_editor_preview';
     $vars[] = 'post_id';
+    $vars[] = 'preview_post_id';
     return $vars;
 }, 300);
 

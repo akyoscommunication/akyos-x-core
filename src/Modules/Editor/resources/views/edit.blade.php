@@ -110,6 +110,90 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Styles pour la modale de prévisualisation */
+        .preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .preview-modal.active {
+            display: flex;
+        }
+
+        .preview-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .preview-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .preview-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+
+        .preview-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .preview-iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .preview-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: #f9fafb;
+        }
+
+        .preview-loading .loading-spinner {
+            width: 40px;
+            height: 40px;
+        }
     </style>
 </head>
 
@@ -127,12 +211,22 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-4">
+                        <!-- Bouton de prévisualisation -->
+                        <button id="preview-button" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" onclick="openPreview()">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            Prévisualiser
+                        </button>
+
                         <a href="{{ home_url('/editor/') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>
                             Retour au dashboard
                         </a>
+
                         <button id="save-button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" onclick="triggerSave()">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
@@ -159,6 +253,20 @@
                 </iframe>
             </div>
         </main>
+    </div>
+
+    <!-- Modale de prévisualisation -->
+    <div id="preview-modal" class="preview-modal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h3>Prévisualisation : {{ $post->post_title }}</h3>
+                <button class="preview-close" onclick="closePreview()">&times;</button>
+            </div>
+            <div id="preview-loading" class="preview-loading">
+                <div class="loading-spinner"></div>
+            </div>
+            <iframe id="preview-iframe" class="preview-iframe" style="display: none;"></iframe>
+        </div>
     </div>
 
     <script>
@@ -206,6 +314,14 @@
                         iframe.contentDocument.dispatchEvent(event);
                     }
 
+                    showStatus('Sauvegarde effectuée avec succès', 'success');
+                    const saveButton = document.getElementById('save-button');
+                    const saveText = document.getElementById('save-text');
+                    if (saveButton) {
+                        saveButton.disabled = false;
+                        saveText.textContent = 'Enregistrer';
+                    }
+
                 } catch (error) {
                     clearTimeout(timeoutId);
                     console.error('Erreur lors de la sauvegarde:', error);
@@ -216,21 +332,6 @@
             }
         }
 
-        window.addEventListener('message', (event) => {
-            if (event.data?.type === 'POST_UPDATED') {
-                console.log('Mise à jour réussie du post ! ID :', event.data.postId);
-                showStatus('Sauvegarde effectuée avec succès', 'success');
-
-                // Réactiver le bouton de sauvegarde
-                const saveButton = document.getElementById('save-button');
-                const saveText = document.getElementById('save-text');
-                if (saveButton) {
-                    saveButton.disabled = false;
-                    saveText.textContent = 'Enregistrer';
-                }
-            }
-        });
-
 
         function showStatus(message, type) {
             const statusEl = document.getElementById('status-message');
@@ -238,7 +339,6 @@
             statusEl.className = 'status-message status-' + type;
             statusEl.style.display = 'block';
 
-            // Masquer le message après 3 secondes
             setTimeout(() => {
                 statusEl.style.display = 'none';
             }, 3000);
@@ -309,44 +409,10 @@
             }
         }
 
-        // Injecter le script de détection de sauvegarde
-        function injectSaveDetectionScript() {
-            const iframe = document.getElementById('gutenberg-frame');
-            if (iframe && iframe.contentWindow) {
-                try {
-                    const script = `
-                        wp.data.subscribe(() => {
-                            const isSaving = wp.data.select('core/editor').isSavingPost();
-
-                            if (isSaving) {
-                                console.log('Sauvegarde en cours');
-                                // Envoyer le message au parent une seule fois
-                                if (!window._notifiedSave) {
-                                    window.parent.postMessage({
-                                        type: 'POST_UPDATED',
-                                        postId: wp.data.select('core/editor').getCurrentPostId(),
-                                    }, '*');
-
-                                    window._notifiedSave = true;
-                                    setTimeout(() => { window._notifiedSave = false }, 1000); // réarmement
-                                }
-                            }
-                        });
-                    `;
-
-                    iframe.contentWindow.eval(script);
-                    console.log('Script de détection de sauvegarde injecté');
-                } catch (error) {
-                    console.log('Impossible d\'injecter le script de détection:', error);
-                }
-            }
-        }
-
         // Injecter le script après le chargement de l'iframe
         document.getElementById('gutenberg-frame').addEventListener('load', function() {
             setTimeout(() => {
                 injectCustomCSS();
-                injectSaveDetectionScript();
             }, 1000); // Réduit le délai pour une meilleure expérience
         });
 
@@ -354,6 +420,245 @@
         function redirectToDashboard() {
             window.location.href = '{{ home_url("/editor/") }}';
         }
+
+        // Fonction pour ouvrir la prévisualisation
+        function openPreview() {
+            const modal = document.getElementById('preview-modal');
+            const iframe = document.getElementById('preview-iframe');
+            const loading = document.getElementById('preview-loading');
+            const previewButton = document.getElementById('preview-button');
+            const gutenbergFrame = document.getElementById('gutenberg-frame');
+
+            // Désactiver le bouton de prévisualisation
+            previewButton.disabled = true;
+            previewButton.innerHTML = `
+                <svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Préparation de la prévisualisation...
+            `;
+
+            // Afficher la modale
+            modal.classList.add('active');
+
+            // Utiliser la prévisualisation native de WordPress
+            getWordPressPreviewUrl()
+                .then(previewUrl => {
+                    console.log('🔗 URL de prévisualisation WordPress:', previewUrl);
+                    loadPreviewInIframe(previewUrl, previewButton, modal, iframe, loading);
+                })
+                .catch(error => {
+                    console.error('❌ Erreur lors de la génération de l\'URL de prévisualisation:', error);
+                    showStatus('Erreur lors de la préparation de la prévisualisation', 'error');
+
+                    // Réactiver le bouton de prévisualisation
+                    previewButton.disabled = false;
+                    previewButton.innerHTML = `
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Prévisualiser
+                    `;
+                });
+        }
+
+        // Obtenir l'URL de prévisualisation WordPress native
+        function getWordPressPreviewUrl() {
+            return new Promise((resolve, reject) => {
+                const gutenbergFrame = document.getElementById('gutenberg-frame');
+                let timeoutId;
+
+                if (gutenbergFrame && gutenbergFrame.contentWindow) {
+                    try {
+                        // Créer un gestionnaire temporaire pour cette requête
+                        const messageHandler = function(event) {
+                            if (event.data && event.data.type === 'WORDPRESS_PREVIEW_URL') {
+                                clearTimeout(timeoutId);
+                                window.removeEventListener('message', messageHandler);
+                                resolve(event.data.url);
+                            } else if (event.data && event.data.type === 'WORDPRESS_PREVIEW_ERROR') {
+                                clearTimeout(timeoutId);
+                                window.removeEventListener('message', messageHandler);
+                                reject(new Error(event.data.error));
+                            }
+                        };
+
+                        // Ajouter l'écouteur temporaire
+                        window.addEventListener('message', messageHandler);
+
+                        // Timeout de sécurité (15 secondes pour la prévisualisation)
+                        timeoutId = setTimeout(() => {
+                            window.removeEventListener('message', messageHandler);
+                            reject(new Error('Timeout lors de la génération de l\'URL de prévisualisation'));
+                        }, 15000);
+
+                        // Script pour utiliser le système de prévisualisation natif de Gutenberg
+                        const homeUrl = '{{ home_url("/") }}';
+                        const scriptContent = [
+                            'try {',
+                            '    console.log("🔧 Début de la génération de prévisualisation Gutenberg");',
+                            '    ',
+                            '    // Récupérer les données du post en cours d\'édition',
+                            '    const postId = wp.data.select("core/editor").getCurrentPostId();',
+                            '    const title = wp.data.select("core/editor").getEditedPostAttribute("title") || "";',
+                            '    const content = wp.data.select("core/editor").getEditedPostAttribute("content") || "";',
+                            '    ',
+                            '    console.log("📝 Données récupérées:", { postId, title: title.substring(0, 50) + "..." });',
+                            '    ',
+                            '    // Méthode 1 : Essayer de récupérer le lien de prévisualisation depuis l\'interface',
+                            '    const previewButton = document.querySelector(\'button[aria-label="Preview"]\') || document.querySelector(\'button[data-label="Preview"]\');',
+                            '    if (previewButton && previewButton.href) {',
+                            '        console.log("🔗 URL de prévisualisation trouvée via bouton:", previewButton.href);',
+                            '        window.parent.postMessage({',
+                            '            type: "WORDPRESS_PREVIEW_URL",',
+                            '            url: previewButton.href',
+                            '        }, "*");',
+                            '    } else {',
+                            '    ',
+                            '    // Méthode 2 : Utiliser l\'API de prévisualisation de Gutenberg',
+                            '    wp.data.dispatch("core/editor").savePost({ isPreview: true }).then(() => {',
+                            '        console.log("✅ Post sauvegardé pour prévisualisation");',
+                            '        ',
+                            '        // Récupérer l\'URL de prévisualisation générée',
+                            '        const post = wp.data.select("core/editor").getCurrentPost();',
+                            '        const previewLink = post._links?.preview?.[0]?.href;',
+                            '        ',
+                            '        if (previewLink) {',
+                            '            console.log("🔗 URL de prévisualisation trouvée:", previewLink);',
+                            '            window.parent.postMessage({',
+                            '                type: "WORDPRESS_PREVIEW_URL",',
+                            '                url: previewLink',
+                            '            }, "*");',
+                            '        } else {',
+                            '            // Méthode 3 : Essayer de récupérer depuis les métadonnées du post',
+                            '            const previewUrl = post.meta?._preview_url || post._preview_url;',
+                            '            if (previewUrl) {',
+                            '                console.log("🔗 URL de prévisualisation trouvée dans les métadonnées:", previewUrl);',
+                            '                window.parent.postMessage({',
+                            '                    type: "WORDPRESS_PREVIEW_URL",',
+                            '                    url: previewUrl',
+                            '                }, "*");',
+                            '            } else {',
+                            '                // Fallback : construire l\'URL manuellement',
+                            '                const fallbackUrl = "' + homeUrl + '?p=" + postId + "&preview=true";',
+                            '                console.log("🔗 URL de prévisualisation fallback:", fallbackUrl);',
+                            '                window.parent.postMessage({',
+                            '                    type: "WORDPRESS_PREVIEW_URL",',
+                            '                    url: fallbackUrl',
+                            '                }, "*");',
+                            '            }',
+                            '        }',
+                            '    }).catch((error) => {',
+                            '        console.error("❌ Erreur lors de la sauvegarde pour prévisualisation:", error);',
+                            '        ',
+                            '        // En cas d\'erreur, essayer de récupérer le lien de prévisualisation existant',
+                            '        const post = wp.data.select("core/editor").getCurrentPost();',
+                            '        const existingPreviewLink = post._links?.preview?.[0]?.href;',
+                            '        ',
+                            '        if (existingPreviewLink) {',
+                            '            console.log("🔗 URL de prévisualisation existante trouvée:", existingPreviewLink);',
+                            '            window.parent.postMessage({',
+                            '                type: "WORDPRESS_PREVIEW_URL",',
+                            '                url: existingPreviewLink',
+                            '            }, "*");',
+                            '        } else {',
+                            '            window.parent.postMessage({',
+                            '                type: "WORDPRESS_PREVIEW_ERROR",',
+                            '                error: error.message',
+                            '            }, "*");',
+                            '        }',
+                            '    });',
+                            '    }',
+                            '    ',
+                            '} catch (error) {',
+                            '    console.error("❌ Erreur lors de la génération de l\'URL:", error);',
+                            '    window.parent.postMessage({',
+                            '        type: "WORDPRESS_PREVIEW_ERROR",',
+                            '        error: error.message',
+                            '    }, "*");',
+                            '}'
+                        ].join('\n');
+
+                        gutenbergFrame.contentWindow.eval(scriptContent);
+                    } catch (error) {
+                        clearTimeout(timeoutId);
+                        console.error('❌ Erreur lors de l\'accès à Gutenberg:', error);
+                        reject(error);
+                    }
+                } else {
+                    reject(new Error('Frame Gutenberg non disponible'));
+                }
+            });
+        }
+
+        // Charger la prévisualisation dans l'iframe (fallback)
+        function loadPreviewInIframe(previewUrl, previewButton, modal, iframe, loading) {
+            iframe.src = previewUrl;
+            iframe.style.display = 'none';
+            loading.style.display = 'flex';
+
+            iframe.onload = function() {
+                loading.style.display = 'none';
+                iframe.style.display = 'block';
+
+                // Réactiver le bouton de prévisualisation
+                previewButton.disabled = false;
+                previewButton.innerHTML = `
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    Prévisualiser
+                `;
+            };
+        }
+
+        // Fonction pour fermer la prévisualisation
+        function closePreview() {
+            const modal = document.getElementById('preview-modal');
+            const iframe = document.getElementById('preview-iframe');
+            const loading = document.getElementById('preview-loading');
+
+            // Masquer la modale
+            modal.classList.remove('active');
+
+            // Réinitialiser l'iframe
+            iframe.src = '';
+            iframe.style.display = 'none';
+            loading.style.display = 'flex';
+        }
+
+        // Générer un token temporaire pour la prévisualisation
+        function generatePreviewToken() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+
+        // Fermer la prévisualisation en cliquant à l'extérieur
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('preview-modal');
+            if (event.target === modal) {
+                closePreview();
+            }
+        });
+
+        // Fermer la prévisualisation avec la touche Échap
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('preview-modal');
+                if (modal.classList.contains('active')) {
+                    closePreview();
+                }
+            }
+        });
+
+        // Gestion des messages postMessage depuis Gutenberg
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'POST_UPDATED') {
+                // Gérer la notification de sauvegarde
+                showStatus('Contenu sauvegardé avec succès !', 'success');
+            }
+        });
     </script>
 
     <?php wp_footer(); ?>

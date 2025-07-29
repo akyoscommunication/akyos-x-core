@@ -1,0 +1,128 @@
+@import 'blocks/content.scss';
+
+%wireframe-block {
+    background-color: rgb(224, 224, 224);
+    color: rgb(224, 224, 224) !important;
+    border: 1px solid rgb(197, 197, 197);
+    position: relative;
+    height: 60px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    @extend %wireframe-block;
+
+    min-width: 450px;
+    position: relative;
+
+    &::before {
+        content: 'TITRE';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 5px;
+        z-index: 1;
+    }
+}
+
+h1 {
+    min-width: 600px;
+}
+
+html body .main section {
+    background-color: #fbfbfb !important;
+    min-height: 600px;
+
+    &.bg-color-primary {
+        background-color: #eaeaea !important;
+    }
+
+    &[class*="s-hero"] {
+        background: none;
+        background-color: #e9e9e9 !important;
+    }
+
+    >.container {
+        p {
+            @extend %wireframe-block;
+
+            height: 50px;
+            min-width: 300px;
+        }
+
+        span {
+            @extend %wireframe-block;
+
+            height: 20px !important;
+            border: none !important;
+        }
+    }
+
+    .c-image {
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #e0e0e0;
+            border: 1px solid rgb(197, 197, 197);
+            z-index: 1;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 48px;
+            height: 48px;
+            background-image: url('/app/themes/akyos-sage/resources/assets/images/placeholder.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 300%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+    }
+
+    .btn {
+        @extend %wireframe-block;
+
+        height: 40px;
+        min-width: 100px;
+        position: relative;
+
+        &::after {
+            content: 'CTA';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 1;
+        }
+    }
+
+    .swiper-buttons {
+        display: none !important;
+    }
+
+}
