@@ -21,14 +21,14 @@ abstract class Block extends Component implements IBootable
      */
     public static function boot(): void
     {
-        $path = get_template_directory().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'View'.DIRECTORY_SEPARATOR.'Blocks';
+        $path = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Blocks';
         $directory = new \RecursiveDirectoryIterator($path);
         $iterator = new \RecursiveIteratorIterator($directory);
         foreach ($iterator as $info) {
             if (preg_match('/\w*[.]php\b/', $info->getFileName())) {
                 require_once $info->getPathName();
                 $name = explode('.', $info->getFileName());
-                $name = 'App\\View\\Blocks\\'.$name[0];
+                $name = 'App\\View\\Blocks\\' . $name[0];
                 (new $name())->registerGutenberg();
             }
         }
@@ -36,13 +36,13 @@ abstract class Block extends Component implements IBootable
         //check if akyos-blocks is installed
         if (InstalledVersions::isInstalled('akyoscommunication/akyos-blocks')) {
             $view = \Roots\view();
-            $view->addNamespace('akyos-blocks', get_template_directory().DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'akyoscommunication'.DIRECTORY_SEPARATOR.'akyos-blocks'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR);
+            $view->addNamespace('akyos-blocks', get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'akyoscommunication' . DIRECTORY_SEPARATOR . 'akyos-blocks' . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR);
 
-            $akyos_blocks = get_template_directory().DIRECTORY_SEPARATOR.'akyos-blocks.json';
+            $akyos_blocks = get_template_directory() . DIRECTORY_SEPARATOR . 'akyos-blocks.json';
             if (file_exists($akyos_blocks)) {
                 $blocks = json_decode(file_get_contents($akyos_blocks), true, 512, JSON_THROW_ON_ERROR);
                 foreach ($blocks as $block) {
-                    $name = 'Akyos\\Blocks\\View\\Blocks\\'.$block;
+                    $name = 'Akyos\\Blocks\\View\\Blocks\\' . $block;
                     (new $name())->registerGutenberg();
                 }
             }
@@ -52,11 +52,11 @@ abstract class Block extends Component implements IBootable
         if (InstalledVersions::isInstalled('akyos/akyos-access')) {
             $view = \Roots\view();
 
-            $akyos_blocks = get_template_directory().DIRECTORY_SEPARATOR.'akyos-blocks.json';
+            $akyos_blocks = get_template_directory() . DIRECTORY_SEPARATOR . 'akyos-blocks.json';
             if (file_exists($akyos_blocks)) {
                 $blocks = json_decode(file_get_contents($akyos_blocks), true, 512, JSON_THROW_ON_ERROR);
                 foreach ($blocks as $block) {
-                    $name = 'Akyos\\Access\\View\\Blocks\\'.$block;
+                    $name = 'Akyos\\Access\\View\\Blocks\\' . $block;
                     (new $name())->registerGutenberg();
                 }
             }
@@ -155,13 +155,13 @@ abstract class Block extends Component implements IBootable
         }
 
         if (isset($block['data']['preview_image_help'])) {
-            echo '<img src="'.$block['data']['preview_image_help'].'" alt="preview" style="width: 100%; height: auto;">';
+            echo '<img src="' . $block['data']['preview_image_help'] . '" alt="preview" style="width: 100%; height: auto;">';
         } else {
 
             echo $this->render()->with($values)
                 ->with(
                     'styles',
-                    !empty($styles) ? $styles : ""
+                    !empty($styles) ? $styles . ';' : ""
                 )
                 ->with(
                     'classes',
@@ -177,10 +177,10 @@ abstract class Block extends Component implements IBootable
 
         if (function_exists('register_extended_field_group')) {
             register_extended_field_group([
-                'title' => $this->gutenberg->getTitle().' Block',
+                'title' => $this->gutenberg->getTitle() . ' Block',
                 'fields' => static::fields(),
                 'location' => [
-                    Location::where('block', 'acf/'.$this->gutenberg->getName())
+                    Location::where('block', 'acf/' . $this->gutenberg->getName())
                 ],
             ]);
         }
