@@ -54,7 +54,8 @@ class QueryBuilder
         return $this;
     }
 
-    public function page(int $page): QueryBuilder {
+    public function page(int $page): QueryBuilder
+    {
         $this->paged = $page;
         return $this;
     }
@@ -71,7 +72,7 @@ class QueryBuilder
         if (!in_array($order, [ASC, DESC])) {
             wp_die('Unable to order by ' . $order . ' because it is not a valid order.');
         }
-        if($acfField) {
+        if ($acfField) {
             $this->metaKey = $acfField;
         }
         $this->orderBy = $value;
@@ -146,16 +147,16 @@ class QueryBuilder
             'posts_per_page' => $this->limit,
             'orderby' => $this->orderBy,
             'order' => $this->order,
-            'offset' => $this->offset ?: ($this->paged-1) * $this->limit,
+            'offset' => $this->offset ?: ($this->paged - 1) * $this->limit,
             'paged' => $this->paged
         ];
-        if(!empty($this->metaKey)) {
+        if (!empty($this->metaKey)) {
             $args['meta_key'] = $this->metaKey;
         }
         if (!empty($this->findWord)) {
             $args['s'] = $this->findWord;
         }
-        if($this->category) {
+        if ($this->category) {
             $args['cat'] = $this->category;
         }
         if (count($this->where) > 0) {
@@ -179,7 +180,7 @@ class QueryBuilder
         }
         $query = (new WP_Query($args));
 
-        if($returnFormat === 'query') {
+        if ($returnFormat === 'query') {
             return $query;
         }
         if ($returnFormat === 'obj') {
