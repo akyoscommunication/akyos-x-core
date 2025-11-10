@@ -76,8 +76,8 @@ class Directives implements IBootable
 	// @menu
 	private function menuDirective()
 	{
-		Blade::directive('menu', function ($expression, $walker = null) {
-			return "<?php echo wp_nav_menu(['theme_location' => $expression, 'walker' => $walker]) ?>";
+		Blade::directive('menu', function ($expression) {
+			return "<?php echo wp_nav_menu(['theme_location' => $expression]) ?>";
 		});
 	}
 
