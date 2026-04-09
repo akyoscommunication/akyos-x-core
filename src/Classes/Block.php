@@ -40,7 +40,7 @@ abstract class Block extends Component implements IBootable
             }
         }
 
-        if (self::themeHasComposerPackage('akyoscommunication/akyos-blocks')) {
+        if (self::themeHasComposerPackage('akyos-blocks')) {
             $view = \Roots\view();
             $view->addNamespace('akyos-blocks', get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'akyos' . DIRECTORY_SEPARATOR . 'akyos-blocks' . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR);
 
@@ -54,7 +54,7 @@ abstract class Block extends Component implements IBootable
             }
         }
 
-        if (self::themeHasComposerPackage('akyos/akyos-access')) {
+        if (self::themeHasComposerPackage('akyos-access')) {
             $view = \Roots\view();
 
             $akyos_blocks = get_template_directory() . DIRECTORY_SEPARATOR . 'akyos-blocks.json';
