@@ -3,7 +3,6 @@
 namespace Akyos\Core\Classes;
 
 use Akyos\Core\Interface\IBootable;
-use Composer\InstalledVersions;
 use Extended\ACF\Fields\Group;
 use Extended\ACF\Location;
 use Roots\Acorn\View\Component;
@@ -14,6 +13,14 @@ abstract class Block extends Component implements IBootable
     public static function hook(): string
     {
         return 'init';
+    }
+
+    private static function themeHasComposerPackage(string $packageName): bool
+    {
+        $slug = basename(str_replace('\\', '/', $packageName));
+        $path = get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR
+            . 'akyos' . DIRECTORY_SEPARATOR . $slug;
+        return is_dir($path);
     }
 
     /**
@@ -33,10 +40,9 @@ abstract class Block extends Component implements IBootable
             }
         }
 
-        //check if akyos-blocks is installed
-        if (InstalledVersions::isInstalled('akyoscommunication/akyos-blocks')) {
+        if (self::themeHasComposerPackage('akyoscommunication/akyos-blocks')) {
             $view = \Roots\view();
-            $view->addNamespace('akyos-blocks', get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'akyoscommunication' . DIRECTORY_SEPARATOR . 'akyos-blocks' . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR);
+            $view->addNamespace('akyos-blocks', get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'akyos' . DIRECTORY_SEPARATOR . 'akyos-blocks' . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR);
 
             $akyos_blocks = get_template_directory() . DIRECTORY_SEPARATOR . 'akyos-blocks.json';
             if (file_exists($akyos_blocks)) {
@@ -48,8 +54,7 @@ abstract class Block extends Component implements IBootable
             }
         }
 
-        //check if akyos-access id installed
-        if (InstalledVersions::isInstalled('akyos/akyos-access')) {
+        if (self::themeHasComposerPackage('akyos/akyos-access')) {
             $view = \Roots\view();
 
             $akyos_blocks = get_template_directory() . DIRECTORY_SEPARATOR . 'akyos-blocks.json';
