@@ -167,8 +167,15 @@ function default_image_url(string $variant = 'image'): string
 
 function attachment_image_url(int|string|null $attachmentId, string $size = 'full', string $variant = 'image'): string
 {
-    $id = (int) $attachmentId;
-    if ($id <= 0 || !wp_attachment_is_image($id)) {
+    if (is_string($attachmentId) && is_numeric($attachmentId)) {
+        $attachmentId = (int) $attachmentId;
+    }
+    if (!is_int($attachmentId)) {
+        return default_image_url($variant);
+    }
+
+    $id = $attachmentId;
+    if ($id <= 0) {
         return default_image_url($variant);
     }
 
@@ -178,21 +185,58 @@ function attachment_image_url(int|string|null $attachmentId, string $size = 'ful
     }
 
     $src = wp_get_attachment_image_src($id, $size);
+    if ($src && !empty($src[0])) {
+        return $src[0];
+    }
 
-    return $src[0] ?? default_image_url($variant);
+    // ponytail: SVG sans metadata — wp_get_attachment_image_src échoue, URL directe suffit
+    $mime = (string) get_post_mime_type($id);
+    if (str_starts_with($mime, 'image/')) {
+        $url = wp_get_attachment_url($id);
+        if ($url) {
+            return $url;
+        }
+    }
+
+    return default_image_url($variant);
 }
 
 function attachment_image_html(int|string|null $attachmentId, string $size = 'full', array $attr = [], string $variant = 'image'): string
 {
     $fallback = default_image_url($variant);
-    $id = (int) $attachmentId;
+    if (is_string($attachmentId) && is_numeric($attachmentId)) {
+        $attachmentId = (int) $attachmentId;
+    }
+    if (!is_int($attachmentId)) {
+        $class = isset($attr['class']) ? ' class="' . esc_attr($attr['class']) . '"' : '';
+        $alt = isset($attr['alt']) ? esc_attr($attr['alt']) : '';
 
-    if ($id > 0 && wp_attachment_is_image($id)) {
+        return '<img src="' . esc_url($fallback) . '" alt="' . $alt . '"' . $class . ' loading="lazy">';
+    }
+
+    $id = $attachmentId;
+
+    if ($id > 0) {
         $path = get_attached_file($id);
         if ($path && file_exists($path)) {
             $attr['onerror'] = 'this.onerror=null;this.src=' . wp_json_encode($fallback);
 
-            return wp_get_attachment_image($id, $size, false, $attr);
+            $html = wp_get_attachment_image($id, $size, false, $attr);
+            if ($html !== '') {
+                return $html;
+            }
+
+            // ponytail: SVG sans metadata — img manuelle avec l’URL du fichier
+            $mime = (string) get_post_mime_type($id);
+            if (str_starts_with($mime, 'image/')) {
+                $url = wp_get_attachment_url($id);
+                if ($url) {
+                    $class = isset($attr['class']) ? ' class="' . esc_attr($attr['class']) . '"' : '';
+                    $alt = isset($attr['alt']) ? esc_attr($attr['alt']) : esc_attr(get_post_meta($id, '_wp_attachment_image_alt', true));
+
+                    return '<img src="' . esc_url($url) . '" alt="' . $alt . '"' . $class . ' loading="lazy" onerror="this.onerror=null;this.src=' . esc_attr(wp_json_encode($fallback)) . '">';
+                }
+            }
         }
     }
 
