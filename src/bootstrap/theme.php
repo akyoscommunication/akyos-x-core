@@ -27,3 +27,14 @@ add_action('widgets_init', function () {
 	}
 
 });
+
+add_action('after_setup_theme', function () {
+	if (!function_exists('view')) {
+		return;
+	}
+
+	$accessViews = get_template_directory() . '/vendor/akyos/akyos-access/resources/views';
+	if (is_dir($accessViews)) {
+		view()->addNamespace('akyos-access', $accessViews);
+	}
+}, 20);

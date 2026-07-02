@@ -67,7 +67,7 @@ function style_vars($styleVars): string
 function options($option = null): bool|string|array
 {
     // Get all theme options
-    $options = get_fields('option');
+    $options = get_fields('option') ?: [];
 
     // If no option is specified, return all options
     if ($option == null) {
@@ -135,4 +135,69 @@ function breadcrumb($delimiter) {
 function objectify(array $array): object
 {
     return json_decode(json_encode($array));
+}
+
+function default_image_url(string $variant = 'image'): string
+{
+    $file = $variant === 'logo' ? 'placeholder-logo.svg' : 'placeholder.svg';
+
+    $candidates = [
+        get_template_directory() . '/resources/assets/images/' . $file,
+        get_template_directory() . '/vendor/akyos/akyos-access/resources/assets/images/' . $file,
+    ];
+
+    foreach ($candidates as $path) {
+        if (file_exists($path)) {
+            if (str_contains($path, '/vendor/akyos/akyos-access/')) {
+                $url = get_template_directory_uri() . '/vendor/akyos/akyos-access/resources/assets/images/' . $file;
+            } else {
+                $url = get_template_directory_uri() . '/resources/assets/images/' . $file;
+            }
+
+            return apply_filters('akyos/default_image_url', $url, $variant);
+        }
+    }
+
+    $svg = $variant === 'logo'
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="80" viewBox="0 0 320 80"><rect fill="#ececec" width="320" height="80"/><text x="160" y="48" text-anchor="middle" fill="#999" font-family="sans-serif" font-size="16">LOGO</text></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect fill="#ececec" width="800" height="600"/><text x="400" y="300" text-anchor="middle" fill="#999" font-family="sans-serif" font-size="22">Image</text></svg>';
+
+    return apply_filters('akyos/default_image_url', 'data:image/svg+xml,' . rawurlencode($svg), $variant);
+}
+
+function attachment_image_url(int|string|null $attachmentId, string $size = 'full', string $variant = 'image'): string
+{
+    $id = (int) $attachmentId;
+    if ($id <= 0 || !wp_attachment_is_image($id)) {
+        return default_image_url($variant);
+    }
+
+    $path = get_attached_file($id);
+    if (!$path || !file_exists($path)) {
+        return default_image_url($variant);
+    }
+
+    $src = wp_get_attachment_image_src($id, $size);
+
+    return $src[0] ?? default_image_url($variant);
+}
+
+function attachment_image_html(int|string|null $attachmentId, string $size = 'full', array $attr = [], string $variant = 'image'): string
+{
+    $fallback = default_image_url($variant);
+    $id = (int) $attachmentId;
+
+    if ($id > 0 && wp_attachment_is_image($id)) {
+        $path = get_attached_file($id);
+        if ($path && file_exists($path)) {
+            $attr['onerror'] = 'this.onerror=null;this.src=' . wp_json_encode($fallback);
+
+            return wp_get_attachment_image($id, $size, false, $attr);
+        }
+    }
+
+    $class = isset($attr['class']) ? ' class="' . esc_attr($attr['class']) . '"' : '';
+    $alt = isset($attr['alt']) ? esc_attr($attr['alt']) : '';
+
+    return '<img src="' . esc_url($fallback) . '" alt="' . $alt . '"' . $class . ' loading="lazy">';
 }

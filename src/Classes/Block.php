@@ -29,14 +29,16 @@ abstract class Block extends Component implements IBootable
     public static function boot(): void
     {
         $path = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Blocks';
-        $directory = new \RecursiveDirectoryIterator($path);
-        $iterator = new \RecursiveIteratorIterator($directory);
-        foreach ($iterator as $info) {
-            if (preg_match('/\w*[.]php\b/', $info->getFileName())) {
-                require_once $info->getPathName();
-                $name = explode('.', $info->getFileName());
-                $name = 'App\\View\\Blocks\\' . $name[0];
-                (new $name())->registerGutenberg();
+        if (is_dir($path)) {
+            $directory = new \RecursiveDirectoryIterator($path);
+            $iterator = new \RecursiveIteratorIterator($directory);
+            foreach ($iterator as $info) {
+                if (preg_match('/\w*[.]php\b/', $info->getFileName())) {
+                    require_once $info->getPathName();
+                    $name = explode('.', $info->getFileName());
+                    $name = 'App\\View\\Blocks\\' . $name[0];
+                    (new $name())->registerGutenberg();
+                }
             }
         }
 
