@@ -165,6 +165,38 @@ function default_image_url(string $variant = 'image'): string
     return apply_filters('akyos/default_image_url', 'data:image/svg+xml,' . rawurlencode($svg), $variant);
 }
 
+function attachment_image_resolved_url(int $id, string $size = 'full'): ?string
+{
+    if ($id <= 0) {
+        return null;
+    }
+
+    $src = wp_get_attachment_image_src($id, $size);
+    if ($src && !empty($src[0])) {
+        $path = get_attached_file($id);
+        if (!$path || !file_exists($path)) {
+            $guid = get_post_field('guid', $id);
+            if (is_string($guid) && filter_var($guid, FILTER_VALIDATE_URL)) {
+                return $guid;
+            }
+        }
+
+        return $src[0];
+    }
+
+    $mime = (string) get_post_mime_type($id);
+    if (str_starts_with($mime, 'image/')) {
+        $guid = get_post_field('guid', $id);
+        if (is_string($guid) && filter_var($guid, FILTER_VALIDATE_URL)) {
+            return $guid;
+        }
+
+        return wp_get_attachment_url($id) ?: null;
+    }
+
+    return null;
+}
+
 function attachment_image_url(int|string|null $attachmentId, string $size = 'full', string $variant = 'image'): string
 {
     if (is_string($attachmentId) && is_numeric($attachmentId)) {
@@ -179,26 +211,9 @@ function attachment_image_url(int|string|null $attachmentId, string $size = 'ful
         return default_image_url($variant);
     }
 
-    $path = get_attached_file($id);
-    if (!$path || !file_exists($path)) {
-        return default_image_url($variant);
-    }
+    $url = attachment_image_resolved_url($id, $size);
 
-    $src = wp_get_attachment_image_src($id, $size);
-    if ($src && !empty($src[0])) {
-        return $src[0];
-    }
-
-    // ponytail: SVG sans metadata — wp_get_attachment_image_src échoue, URL directe suffit
-    $mime = (string) get_post_mime_type($id);
-    if (str_starts_with($mime, 'image/')) {
-        $url = wp_get_attachment_url($id);
-        if ($url) {
-            return $url;
-        }
-    }
-
-    return default_image_url($variant);
+    return $url ?? default_image_url($variant);
 }
 
 function attachment_image_html(int|string|null $attachmentId, string $size = 'full', array $attr = [], string $variant = 'image'): string
@@ -217,26 +232,22 @@ function attachment_image_html(int|string|null $attachmentId, string $size = 'fu
     $id = $attachmentId;
 
     if ($id > 0) {
-        $path = get_attached_file($id);
-        if ($path && file_exists($path)) {
+        $url = attachment_image_resolved_url($id, $size);
+        if ($url) {
             $attr['onerror'] = 'this.onerror=null;this.src=' . wp_json_encode($fallback);
+            $path = get_attached_file($id);
 
-            $html = wp_get_attachment_image($id, $size, false, $attr);
-            if ($html !== '') {
-                return $html;
-            }
-
-            // ponytail: SVG sans metadata — img manuelle avec l’URL du fichier
-            $mime = (string) get_post_mime_type($id);
-            if (str_starts_with($mime, 'image/')) {
-                $url = wp_get_attachment_url($id);
-                if ($url) {
-                    $class = isset($attr['class']) ? ' class="' . esc_attr($attr['class']) . '"' : '';
-                    $alt = isset($attr['alt']) ? esc_attr($attr['alt']) : esc_attr(get_post_meta($id, '_wp_attachment_image_alt', true));
-
-                    return '<img src="' . esc_url($url) . '" alt="' . $alt . '"' . $class . ' loading="lazy" onerror="this.onerror=null;this.src=' . esc_attr(wp_json_encode($fallback)) . '">';
+            if ($path && file_exists($path)) {
+                $html = wp_get_attachment_image($id, $size, false, $attr);
+                if ($html !== '') {
+                    return $html;
                 }
             }
+
+            $class = isset($attr['class']) ? ' class="' . esc_attr($attr['class']) . '"' : '';
+            $alt = isset($attr['alt']) ? esc_attr($attr['alt']) : esc_attr(get_post_meta($id, '_wp_attachment_image_alt', true));
+
+            return '<img src="' . esc_url($url) . '" alt="' . $alt . '"' . $class . ' loading="lazy" onerror="this.onerror=null;this.src=' . esc_attr(wp_json_encode($fallback)) . '">';
         }
     }
 

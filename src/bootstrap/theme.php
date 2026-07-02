@@ -34,7 +34,23 @@ add_action('after_setup_theme', function () {
 	}
 
 	$accessViews = get_template_directory() . '/vendor/akyos/akyos-access/resources/views';
-	if (is_dir($accessViews)) {
-		view()->addNamespace('akyos-access', $accessViews);
+	if (!is_dir($accessViews)) {
+		return;
 	}
-}, 20);
+
+	view()->addNamespace('akyos-access', $accessViews);
+
+	// Priorité sur le image.blade.php legacy du thème (MediaAccess = tableaux ACF)
+	if (class_exists(\Illuminate\Support\Facades\Blade::class)) {
+		\Illuminate\Support\Facades\Blade::component('akyos-access::components.image', 'image');
+		\Illuminate\Support\Facades\Blade::component('akyos-access::components.media', 'media');
+	}
+}, 100);
+
+add_action('cli_init', static function (): void {
+	if (!class_exists('WP_CLI') || !class_exists(\Akyos\Access\Console\AkyosAccessCommand::class)) {
+		return;
+	}
+
+	\WP_CLI::add_command('akyos-access', \Akyos\Access\Console\AkyosAccessCommand::class);
+});
