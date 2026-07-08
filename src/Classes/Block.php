@@ -15,17 +15,6 @@ abstract class Block extends Component implements IBootable
         return 'init';
     }
 
-    private static function themeHasComposerPackage(string $packageName): bool
-    {
-        $slug = basename(str_replace('\\', '/', $packageName));
-        $path = get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR
-            . 'akyos' . DIRECTORY_SEPARATOR . $slug;
-        return is_dir($path);
-    }
-
-    /**
-     * @throws \JsonException
-     */
     public static function boot(): void
     {
         $path = get_template_directory() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Blocks';
@@ -37,33 +26,6 @@ abstract class Block extends Component implements IBootable
                     require_once $info->getPathName();
                     $name = explode('.', $info->getFileName());
                     $name = 'App\\View\\Blocks\\' . $name[0];
-                    (new $name())->registerGutenberg();
-                }
-            }
-        }
-
-        if (self::themeHasComposerPackage('akyos-blocks')) {
-            $view = \Roots\view();
-            $view->addNamespace('akyos-blocks', get_template_directory() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'akyos' . DIRECTORY_SEPARATOR . 'akyos-blocks' . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR);
-
-            $akyos_blocks = get_template_directory() . DIRECTORY_SEPARATOR . 'akyos-blocks.json';
-            if (file_exists($akyos_blocks)) {
-                $blocks = json_decode(file_get_contents($akyos_blocks), true, 512, JSON_THROW_ON_ERROR);
-                foreach ($blocks as $block) {
-                    $name = 'Akyos\\Blocks\\View\\Blocks\\' . $block;
-                    (new $name())->registerGutenberg();
-                }
-            }
-        }
-
-        if (self::themeHasComposerPackage('akyos-access')) {
-            $view = \Roots\view();
-
-            $akyos_blocks = get_template_directory() . DIRECTORY_SEPARATOR . 'akyos-blocks.json';
-            if (file_exists($akyos_blocks)) {
-                $blocks = json_decode(file_get_contents($akyos_blocks), true, 512, JSON_THROW_ON_ERROR);
-                foreach ($blocks as $block) {
-                    $name = 'Akyos\\Access\\View\\Blocks\\' . $block;
                     (new $name())->registerGutenberg();
                 }
             }
